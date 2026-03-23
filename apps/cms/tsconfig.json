@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "commonjs",
+    "lib": ["ES2019"],
+    "outDir": "dist",
+    "rootDir": "src",
+    "jsx": "react",
+    "moduleResolution": "node",
+    "paths": {
+      "@payload-types": ["./src/payload-types.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

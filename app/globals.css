@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Roboto", sans-serif;
+
+  --color-background: hsl(0 0% 13%); /* #222222 */
+  --color-foreground: hsl(0 0% 100%); /* #FFFFFF */
+  
+  --color-primary: hsl(358 89% 29%); /* #8C080C Bordo */
+  --color-primary-foreground: hsl(0 0% 100%);
+  
+  --color-secondary: hsl(32 38% 62%); /* #C0A07B Golden Beige */
+  --color-secondary-foreground: hsl(0 0% 13%);
+  
+  --color-muted: hsl(0 0% 20%);
+  --color-muted-foreground: hsl(0 0% 70%);
+  
+  --color-card: hsl(0 0% 15%);
+  --color-card-foreground: hsl(0 0% 100%);
+  
+  --color-border: hsl(0 0% 25%);
+  --color-input: hsl(0 0% 25%);
+  --color-ring: hsl(32 38% 62%);
+  
+  --radius: 0px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans font-light antialiased bg-background text-foreground;
+    background-color: #222222;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-normal;
+  }
+}
+
+@layer utilities {
+  .text-gold {
+    color: #C0A07B;
+  }
+  .bg-gold {
+    background-color: #C0A07B;
+  }
+  .border-gold {
+    border-color: #C0A07B;
+  }
+  .text-bordo {
+    color: #8C080C;
+  }
+  .bg-bordo {
+    background-color: #8C080C;
+  }
+  .hover-bg-bordo:hover {
+    background-color: #7a060a;
+  }
+}
