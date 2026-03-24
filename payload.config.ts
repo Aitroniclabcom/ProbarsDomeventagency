@@ -2,6 +2,9 @@ import { buildConfig } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { Users } from './collections/Users'
+import { Pages } from './collections/Pages'
+import { Media } from './collections/Media'
+import { SiteSettings } from './globals/SiteSettings'
 
 export default buildConfig({
   admin: {
@@ -14,8 +17,8 @@ export default buildConfig({
     },
   }),
   editor: lexicalEditor({}),
-  collections: [Users],
-  globals: [],
+  collections: [Users, Pages, Media],
+  globals: [SiteSettings],
   typescript: {
     outputFile: './payload-types.ts',
   },
