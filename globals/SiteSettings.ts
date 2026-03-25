@@ -13,7 +13,7 @@ export const SiteSettings: GlobalConfig = {
         { name: 'logo', type: 'upload', relationTo: 'media' },
         { name: 'contactEmail', type: 'email' },
         { name: 'phone', type: 'text' },
-        { name: 'address', type: 'textarea' },
+        { name: 'address', type: 'textarea', localized: true },
       ],
     },
     {
@@ -25,6 +25,7 @@ export const SiteSettings: GlobalConfig = {
           name: 'navLinks',
           type: 'array',
           label: 'Navigācijas saites',
+          localized: true,
           fields: [
             { name: 'label', type: 'text', required: true },
             { name: 'href', type: 'text', required: true },
@@ -37,7 +38,7 @@ export const SiteSettings: GlobalConfig = {
       type: 'group',
       label: 'Footer',
       fields: [
-        { name: 'tagline', type: 'text', label: 'Apakšvirsraksts' },
+        { name: 'tagline', type: 'text', label: 'Apakšvirsraksts', localized: true },
         { name: 'copyrightText', type: 'text', label: 'Copyright teksts' },
         {
           name: 'socialLinks',
@@ -53,6 +54,7 @@ export const SiteSettings: GlobalConfig = {
           name: 'footerLinks',
           type: 'array',
           label: 'Footer saites',
+          localized: true,
           fields: [
             { name: 'label', type: 'text', required: true },
             { name: 'href', type: 'text', required: true },

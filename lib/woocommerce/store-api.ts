@@ -1,16 +1,23 @@
 import { wcAPI } from "./client";
-import { mapWCProductToFrontend, mapWCCartToFrontend, type FrontendProduct, type FrontendCart } from "./mappers";
-import type { Locale } from "@/context/LanguageContext";
+import {
+  mapWCProductToFrontend,
+  mapWCCartToFrontend,
+  type FrontendProduct,
+  type FrontendCart,
+  type WCStoreProduct,
+  type WCStoreCart,
+} from "./mappers";
+import type { Language } from "@/i18n/translations";
 
-export async function fetchProducts(locale: Locale = "en", params?: { per_page?: number; page?: number; search?: string }) {
-  const response = await wcAPI.getProducts(params);
+export async function fetchProducts(locale: Language = "en", params?: { per_page?: number; page?: number; search?: string }) {
+  const response = (await wcAPI.getProducts(params)) as unknown[] | { products?: unknown[] };
   const products = Array.isArray(response) ? response : response.products || [];
   return products.map((p: any) => mapWCProductToFrontend(p, locale));
 }
 
-export async function fetchProductBySlug(slug: string, locale: Locale = "en"): Promise<FrontendProduct | null> {
+export async function fetchProductBySlug(slug: string, locale: Language = "en"): Promise<FrontendProduct | null> {
   try {
-    const product = await wcAPI.getProduct(slug);
+    const product = (await wcAPI.getProduct(slug)) as WCStoreProduct;
     return mapWCProductToFrontend(product, locale);
   } catch (error) {
     console.error(`Failed to fetch product ${slug}:`, error);
@@ -24,7 +31,7 @@ export async function fetchCategories() {
 
 export async function fetchCart(): Promise<FrontendCart | null> {
   try {
-    const cart = await wcAPI.getCart();
+    const cart = (await wcAPI.getCart()) as WCStoreCart;
     return mapWCCartToFrontend(cart);
   } catch (error) {
     console.error("Failed to fetch cart:", error);

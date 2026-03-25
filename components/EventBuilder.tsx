@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { usePayloadPage } from "@/components/PayloadDataProvider";
 
 export function EventBuilder() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -17,13 +18,23 @@ export function EventBuilder() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useLanguage();
   const { toast } = useToast();
+  const payloadData = usePayloadPage();
+  const eventBuilderBlock = payloadData?.layout?.find((b: { blockType?: string }) => b.blockType === "eventBuilder");
+
+  const getServiceData = (key: string, fallbackTitle: string, fallbackDesc: string) => {
+    const payloadService = eventBuilderBlock?.services?.find((s: { key?: string }) => s.key === key);
+    return {
+      title: payloadService?.title ?? fallbackTitle,
+      description: payloadService?.description ?? fallbackDesc,
+    };
+  };
 
   const services = [
-    { id: "drinks", title: t("builder.services.drinks.title"), description: t("builder.services.drinks.desc") },
-    { id: "food", title: t("builder.services.food.title"), description: t("builder.services.food.desc") },
-    { id: "decor", title: t("builder.services.decor.title"), description: t("builder.services.decor.desc") },
-    { id: "music", title: t("builder.services.music.title"), description: t("builder.services.music.desc") },
-    { id: "logistics", title: t("builder.services.logistics.title"), description: t("builder.services.logistics.desc") },
+    { id: "drinks", ...getServiceData("drinks", t("builder.services.drinks.title"), t("builder.services.drinks.desc")) },
+    { id: "food", ...getServiceData("food", t("builder.services.food.title"), t("builder.services.food.desc")) },
+    { id: "decor", ...getServiceData("decor", t("builder.services.decor.title"), t("builder.services.decor.desc")) },
+    { id: "music", ...getServiceData("music", t("builder.services.music.title"), t("builder.services.music.desc")) },
+    { id: "logistics", ...getServiceData("logistics", t("builder.services.logistics.title"), t("builder.services.logistics.desc")) },
   ];
 
   const toggleExpand = (id: string) => setExpandedId(expandedId === id ? null : id);
@@ -61,7 +72,7 @@ export function EventBuilder() {
   return (
     <section className="py-24 bg-[#1a1a1a] relative overflow-hidden">
       <div className="container mx-auto px-6 relative z-10">
-        <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{t("builder.title")}</h2>
+        <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{eventBuilderBlock?.heading ?? t("builder.title")}</h2>
 
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           <div className="space-y-4">
@@ -104,7 +115,7 @@ export function EventBuilder() {
                 <AnimatePresence mode="popLayout">
                   {selectedServices.length === 0 && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-gray-500 font-light italic text-center py-12">
-                      {t("builder.emptyState")}
+                      {eventBuilderBlock?.emptyStateText ?? t("builder.emptyState")}
                     </motion.div>
                   )}
                   {selectedServices.map((service) => (
@@ -121,7 +132,7 @@ export function EventBuilder() {
                   disabled={selectedServices.length === 0}
                   className="w-full bg-[#8C080C] text-white py-4 text-sm tracking-[0.2em] hover:bg-[#a0090e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-[#8C080C]"
                 >
-                  {t("builder.submit")} <ArrowRight size={16} />
+                  {eventBuilderBlock?.submitButtonText ?? t("builder.submit")} <ArrowRight size={16} />
                 </button>
               </div>
             </div>

@@ -1,7 +1,6 @@
 import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -11,7 +10,7 @@ export const users = pgTable("users", {
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({ username: true, password: true });
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertUser = Pick<typeof users.$inferInsert, "username" | "password">;
 export type User = typeof users.$inferSelect;
 
 export const products = pgTable("products", {
@@ -37,7 +36,7 @@ export const products = pgTable("products", {
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type InsertProduct = Omit<typeof products.$inferInsert, "id" | "createdAt" | "updatedAt">;
 export type Product = typeof products.$inferSelect;
 
 export const deliveryOptions = pgTable("delivery_options", {
@@ -55,7 +54,7 @@ export const deliveryOptions = pgTable("delivery_options", {
 });
 
 export const insertDeliveryOptionSchema = createInsertSchema(deliveryOptions).omit({ id: true });
-export type InsertDeliveryOption = z.infer<typeof insertDeliveryOptionSchema>;
+export type InsertDeliveryOption = Omit<typeof deliveryOptions.$inferInsert, "id">;
 export type DeliveryOption = typeof deliveryOptions.$inferSelect;
 
 export const orders = pgTable("orders", {
@@ -77,7 +76,7 @@ export const orders = pgTable("orders", {
 });
 
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true, paidAt: true });
-export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type InsertOrder = Omit<typeof orders.$inferInsert, "id" | "createdAt" | "paidAt">;
 export type Order = typeof orders.$inferSelect;
 
 export const orderItems = pgTable("order_items", {
@@ -94,7 +93,7 @@ export const orderItems = pgTable("order_items", {
 });
 
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true, downloadCount: true });
-export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+export type InsertOrderItem = Omit<typeof orderItems.$inferInsert, "id" | "downloadCount">;
 export type OrderItem = typeof orderItems.$inferSelect;
 
 export const blogPosts = pgTable("blog_posts", {
@@ -116,7 +115,7 @@ export const blogPosts = pgTable("blog_posts", {
 });
 
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type InsertBlogPost = Omit<typeof blogPosts.$inferInsert, "id" | "createdAt" | "updatedAt">;
 export type BlogPost = typeof blogPosts.$inferSelect;
 
 export const siteSettings = pgTable("site_settings", {
@@ -127,5 +126,5 @@ export const siteSettings = pgTable("site_settings", {
 });
 
 export const insertSiteSettingSchema = createInsertSchema(siteSettings).omit({ id: true, updatedAt: true });
-export type InsertSiteSetting = z.infer<typeof insertSiteSettingSchema>;
+export type InsertSiteSetting = Omit<typeof siteSettings.$inferInsert, "id" | "updatedAt">;
 export type SiteSetting = typeof siteSettings.$inferSelect;

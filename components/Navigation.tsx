@@ -6,6 +6,7 @@ import { Menu, X, Globe, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCart } from "@/context/CartContext";
+import { usePayloadSettings } from "@/components/PayloadDataProvider";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 
@@ -16,6 +17,8 @@ export function Navigation() {
   const { itemCount, setIsCartOpen } = useCart();
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const pathname = usePathname();
+  const payloadSettings = usePayloadSettings();
+  const navLinks = payloadSettings?.header?.navLinks;
 
   const { data: publicSettings } = useQuery({
     queryKey: ["public-settings"],
@@ -40,6 +43,9 @@ export function Navigation() {
     setLangMenuOpen(false);
   };
 
+  const isExternalHref = (href: string) =>
+    /^https?:\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:");
+
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-[#222222]/90 backdrop-blur-md py-4" : "bg-transparent py-6"}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
@@ -49,14 +55,41 @@ export function Navigation() {
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex gap-8 items-center font-sans font-light text-sm tracking-widest text-white">
-          <a href={isHome ? "#about" : "/#about"} className="hover:text-[#C0A07B] transition-colors">{t("nav.about")}</a>
-          <a href={isHome ? "#team" : "/#team"} className="hover:text-[#C0A07B] transition-colors">{t("nav.team")}</a>
-          <a href={isHome ? "#services" : "/#services"} className="hover:text-[#C0A07B] transition-colors">{t("nav.services")}</a>
-          <Link href="/shop" className={`hover:text-[#C0A07B] transition-colors ${pathname === "/shop" ? "text-[#C0A07B]" : ""}`}>{t("nav.shop")}</Link>
-          {showBlog && (
-            <Link href="/blog" className={`hover:text-[#C0A07B] transition-colors ${pathname === "/blog" || pathname?.startsWith("/blog/") ? "text-[#C0A07B]" : ""}`}>{t("nav.blog")}</Link>
+          {navLinks?.length ? (
+            navLinks.map((link: { label?: string; href?: string }, i: number) => {
+              const href = link.href ?? "#";
+              const label = link.label ?? "";
+              if (isExternalHref(href)) {
+                return (
+                  <a
+                    key={i}
+                    href={href}
+                    className="text-xs tracking-[0.15em] hover:text-[#C0A07B] transition-colors"
+                    target={href.startsWith("http") ? "_blank" : undefined}
+                    rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  >
+                    {label}
+                  </a>
+                );
+              }
+              return (
+                <Link key={i} href={href} className="text-xs tracking-[0.15em] hover:text-[#C0A07B] transition-colors">
+                  {label}
+                </Link>
+              );
+            })
+          ) : (
+            <>
+              <a href={isHome ? "#about" : "/#about"} className="hover:text-[#C0A07B] transition-colors">{t("nav.about")}</a>
+              <a href={isHome ? "#team" : "/#team"} className="hover:text-[#C0A07B] transition-colors">{t("nav.team")}</a>
+              <a href={isHome ? "#services" : "/#services"} className="hover:text-[#C0A07B] transition-colors">{t("nav.services")}</a>
+              <Link href="/shop" className={`hover:text-[#C0A07B] transition-colors ${pathname === "/shop" ? "text-[#C0A07B]" : ""}`}>{t("nav.shop")}</Link>
+              {showBlog && (
+                <Link href="/blog" className={`hover:text-[#C0A07B] transition-colors ${pathname === "/blog" || pathname?.startsWith("/blog/") ? "text-[#C0A07B]" : ""}`}>{t("nav.blog")}</Link>
+              )}
+              <a href={isHome ? "#contacts" : "/#contacts"} className="hover:text-[#C0A07B] transition-colors">{t("nav.contacts")}</a>
+            </>
           )}
-          <a href={isHome ? "#contacts" : "/#contacts"} className="hover:text-[#C0A07B] transition-colors">{t("nav.contacts")}</a>
 
           <button onClick={() => setIsCartOpen(true)} className="relative hover:text-[#C0A07B] transition-colors ml-4">
             <ShoppingBag size={18} />
@@ -117,14 +150,42 @@ export function Navigation() {
               className="fixed inset-0 bg-[#111] flex flex-col items-center justify-center gap-8 text-2xl font-serif"
             >
               <button className="absolute top-6 right-6 text-white" onClick={() => setIsOpen(false)}><X size={32} /></button>
-              <a href={isHome ? "#about" : "/#about"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.about")}</a>
-              <a href={isHome ? "#team" : "/#team"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.team")}</a>
-              <a href={isHome ? "#services" : "/#services"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.services")}</a>
-              <Link href="/shop" onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.shop")}</Link>
-              {showBlog && (
-                <Link href="/blog" onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.blog")}</Link>
+              {navLinks?.length ? (
+                navLinks.map((link: { label?: string; href?: string }, i: number) => {
+                  const href = link.href ?? "#";
+                  const label = link.label ?? "";
+                  if (isExternalHref(href)) {
+                    return (
+                      <a
+                        key={i}
+                        href={href}
+                        onClick={() => setIsOpen(false)}
+                        className="hover:text-[#C0A07B] transition-colors"
+                        target={href.startsWith("http") ? "_blank" : undefined}
+                        rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                      >
+                        {label}
+                      </a>
+                    );
+                  }
+                  return (
+                    <Link key={i} href={href} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">
+                      {label}
+                    </Link>
+                  );
+                })
+              ) : (
+                <>
+                  <a href={isHome ? "#about" : "/#about"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.about")}</a>
+                  <a href={isHome ? "#team" : "/#team"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.team")}</a>
+                  <a href={isHome ? "#services" : "/#services"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.services")}</a>
+                  <Link href="/shop" onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.shop")}</Link>
+                  {showBlog && (
+                    <Link href="/blog" onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.blog")}</Link>
+                  )}
+                  <a href={isHome ? "#contacts" : "/#contacts"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.contacts")}</a>
+                </>
               )}
-              <a href={isHome ? "#contacts" : "/#contacts"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.contacts")}</a>
             </motion.div>
           )}
         </AnimatePresence>

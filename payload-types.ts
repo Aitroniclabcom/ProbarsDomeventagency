@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     pages: Page;
     media: Media;
+    posts: Post;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -80,6 +81,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -88,14 +90,14 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('lv' | 'ru' | 'en') | ('lv' | 'ru' | 'en')[];
   globals: {
     'site-settings': SiteSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
-  locale: null;
+  locale: 'lv' | 'ru' | 'en';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -163,6 +165,7 @@ export interface Page {
             subheading?: string | null;
             buttonText?: string | null;
             buttonLink?: string | null;
+            backgroundImage?: (number | null) | Media;
             id?: string | null;
             blockName?: string | null;
             blockType: 'hero';
@@ -205,13 +208,19 @@ export interface Page {
           }
         | {
             heading?: string | null;
-            images?: (number | Media)[] | null;
+            images?:
+              | {
+                  image: number | Media;
+                  caption?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'gallery';
           }
         | {
-            heading?: string | null;
+            heading: string;
             text?: string | null;
             buttonText?: string | null;
             buttonLink?: string | null;
@@ -281,6 +290,43 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * Cover image: upload in Media, then select here. Rich text is per locale (lv/ru/en). Set status Published and Published date for the post to appear on the site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  slug: string;
+  status?: ('draft' | 'published') | null;
+  publishedAt?: string | null;
+  excerpt?: string | null;
+  coverImage?: (number | null) | Media;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -315,6 +361,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -397,6 +447,7 @@ export interface PagesSelect<T extends boolean = true> {
               subheading?: T;
               buttonText?: T;
               buttonLink?: T;
+              backgroundImage?: T;
               id?: T;
               blockName?: T;
             };
@@ -428,7 +479,13 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               heading?: T;
-              images?: T;
+              images?:
+                | T
+                | {
+                    image?: T;
+                    caption?: T;
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -504,6 +561,28 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  publishedAt?: T;
+  excerpt?: T;
+  coverImage?: T;
+  content?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

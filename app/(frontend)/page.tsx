@@ -7,41 +7,93 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Plus, Disc, Wine, ChevronDown, PenTool, Lightbulb, Users } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { usePayloadPage } from "@/components/PayloadDataProvider";
 import Image from "next/image";
 
-const partners = [
-  { name: "MV Group", logo: "/assets/partners/mvgroup.png" },
-  { name: "M Collections", logo: "/assets/partners/mcollection.png" },
-  { name: "Latgalian Bartenders Club", logo: "/assets/partners/lbc.png" },
-  { name: "Park Hotel Latgola", logo: "/assets/partners/latgola.png" },
-  { name: "Gemoss", logo: "/assets/partners/gemoss.png" },
-  { name: "1st Boogie Garden", logo: "/assets/partners/boogie.png" },
-  { name: "Par Ziediem", logo: "/assets/partners/parziediem.png" },
-  { name: "Sound Light Serviss", logo: "/assets/partners/sls.png" },
-];
-
-const teamMembers = [
-  { name: "Deniss Smirnovs", roleKey: "team.members.deniss.role", image: "/assets/team/deniss.jpg", bioKey: "team.members.deniss.bio", fullBioKey: "team.members.deniss.fullBio" },
-  { name: "Anastasija Kazarina", roleKey: "team.members.anastasija.role", image: "/assets/team/anastasija.jpg", bioKey: "team.members.anastasija.bio", fullBioKey: "team.members.anastasija.fullBio" },
-  { name: "Oļegs Porietis", roleKey: "team.members.olegs.role", image: "/assets/team/olegs.jpg", bioKey: "team.members.olegs.bio", fullBioKey: "team.members.olegs.fullBio" },
-  { name: "Andris Konopackis", roleKey: "team.members.andris.role", image: "/assets/team/andris.jpg", bioKey: "team.members.andris.bio", fullBioKey: "team.members.andris.fullBio" },
-  { name: "Laura Rudko", roleKey: "team.members.laura.role", image: "/assets/team/laura.jpg", bioKey: "team.members.laura.bio", fullBioKey: "team.members.laura.fullBio" },
-  { name: "Vladislavs Saveljevs", roleKey: "team.members.vladislavs.role", image: "/assets/team/vladislavs.jpg", bioKey: "team.members.vladislavs.bio", fullBioKey: "team.members.vladislavs.fullBio" },
-];
-
-const galleryImages = [
-  { src: "/assets/gallery/food-detail.jpg", alt: "Food detail" },
-  { src: "/assets/gallery/cocktail-art.jpg", alt: "Cocktail art" },
-  { src: "/assets/gallery/appetizer.jpg", alt: "Appetizer" },
-  { src: "/assets/gallery/champagne-tower.jpg", alt: "Champagne tower" },
-  { src: "/assets/gallery/buffet.jpg", alt: "Buffet" },
-  { src: "/assets/gallery/champagne-glasses.jpg", alt: "Champagne glasses" },
-  { src: "/assets/gallery/pouring.jpg", alt: "Pouring" },
-  { src: "/assets/gallery/wedding-champagne.jpg", alt: "Wedding champagne" },
-  { src: "/assets/gallery/fire-show.jpg", alt: "Fire show" },
-];
-
 export default function HomePage() {
+  const payloadData = usePayloadPage();
+  const heroBlock = payloadData?.layout?.find((b: any) => b.blockType === "hero");
+  const teamBlock = payloadData?.layout?.find((b: any) => b.blockType === "team");
+  const galleryBlock = payloadData?.layout?.find((b: any) => b.blockType === "gallery");
+  const partnersBlock = payloadData?.layout?.find((b: any) => b.blockType === "partners");
+  const eventBuilderBlock = payloadData?.layout?.find((b: any) => b.blockType === "eventBuilder");
+
+  const partnerLogoMap: Record<string, string> = {
+    "MV Group": "/assets/partners/mvgroup.png",
+    "M Collections": "/assets/partners/mcollection.png",
+    "Latgalian Bartenders Club": "/assets/partners/lbc.png",
+    "Park Hotel Latgola": "/assets/partners/latgola.png",
+    Gemoss: "/assets/partners/gemoss.png",
+    "1st Boogie Garden": "/assets/partners/boogie.png",
+    "Par Ziediem": "/assets/partners/parziediem.png",
+    "Sound Light Serviss": "/assets/partners/sls.png",
+  };
+
+  const teamImageMap: Record<string, string> = {
+    "Deniss Smirnovs": "/assets/team/deniss.jpg",
+    "Anastasija Kazarina": "/assets/team/anastasija.jpg",
+    "Oļegs Porietis": "/assets/team/olegs.jpg",
+    "Andris Konopackis": "/assets/team/andris.jpg",
+    "Laura Rudko": "/assets/team/laura.jpg",
+    "Vladislavs Saveljevs": "/assets/team/vladislavs.jpg",
+  };
+
+  const partners: { name: string; logo: string }[] = partnersBlock?.partners?.length
+    ? partnersBlock.partners.map((p: any) => ({
+        name: p.name,
+        logo: p.logo?.url ?? partnerLogoMap[p.name] ?? "",
+      }))
+    : [
+        { name: "MV Group", logo: "/assets/partners/mvgroup.png" },
+        { name: "M Collections", logo: "/assets/partners/mcollection.png" },
+        { name: "Latgalian Bartenders Club", logo: "/assets/partners/lbc.png" },
+        { name: "Park Hotel Latgola", logo: "/assets/partners/latgola.png" },
+        { name: "Gemoss", logo: "/assets/partners/gemoss.png" },
+        { name: "1st Boogie Garden", logo: "/assets/partners/boogie.png" },
+        { name: "Par Ziediem", logo: "/assets/partners/parziediem.png" },
+        { name: "Sound Light Serviss", logo: "/assets/partners/sls.png" },
+      ];
+
+  const teamMembers: {
+    name: string
+    roleKey: string
+    image: string
+    bioKey: string
+    fullBioKey: string
+  }[] = teamBlock?.members?.length
+    ? teamBlock.members.map((m: any) => ({
+        name: m.name,
+        roleKey: m.role ?? "",
+        image: m.image?.url ?? teamImageMap[m.name] ?? "/assets/team/placeholder.jpg",
+        bioKey: m.bio ?? "",
+        fullBioKey: m.fullBio ?? "",
+      }))
+    : [
+        { name: "Deniss Smirnovs", roleKey: "team.members.deniss.role", image: "/assets/team/deniss.jpg", bioKey: "team.members.deniss.bio", fullBioKey: "team.members.deniss.fullBio" },
+        { name: "Anastasija Kazarina", roleKey: "team.members.anastasija.role", image: "/assets/team/anastasija.jpg", bioKey: "team.members.anastasija.bio", fullBioKey: "team.members.anastasija.fullBio" },
+        { name: "Oļegs Porietis", roleKey: "team.members.olegs.role", image: "/assets/team/olegs.jpg", bioKey: "team.members.olegs.bio", fullBioKey: "team.members.olegs.fullBio" },
+        { name: "Andris Konopackis", roleKey: "team.members.andris.role", image: "/assets/team/andris.jpg", bioKey: "team.members.andris.bio", fullBioKey: "team.members.andris.fullBio" },
+        { name: "Laura Rudko", roleKey: "team.members.laura.role", image: "/assets/team/laura.jpg", bioKey: "team.members.laura.bio", fullBioKey: "team.members.laura.fullBio" },
+        { name: "Vladislavs Saveljevs", roleKey: "team.members.vladislavs.role", image: "/assets/team/vladislavs.jpg", bioKey: "team.members.vladislavs.bio", fullBioKey: "team.members.vladislavs.fullBio" },
+      ];
+
+  const galleryImages: { src: string; alt: string }[] = galleryBlock?.images?.length
+    ? galleryBlock.images.map((img: any) => ({
+        src: img.image?.url ?? "",
+        alt: img.caption ?? "",
+      }))
+    : [
+        { src: "/assets/gallery/food-detail.jpg", alt: "Food detail" },
+        { src: "/assets/gallery/cocktail-art.jpg", alt: "Cocktail art" },
+        { src: "/assets/gallery/appetizer.jpg", alt: "Appetizer" },
+        { src: "/assets/gallery/champagne-tower.jpg", alt: "Champagne tower" },
+        { src: "/assets/gallery/buffet.jpg", alt: "Buffet" },
+        { src: "/assets/gallery/champagne-glasses.jpg", alt: "Champagne glasses" },
+        { src: "/assets/gallery/pouring.jpg", alt: "Pouring" },
+        { src: "/assets/gallery/wedding-champagne.jpg", alt: "Wedding champagne" },
+        { src: "/assets/gallery/fire-show.jpg", alt: "Fire show" },
+      ];
+
   const [activeAboutIndex, setActiveAboutIndex] = useState<number | null>(null);
   const [expandedServiceIndex, setExpandedServiceIndex] = useState<number | null>(null);
   const [isCateringDetailsOpen, setIsCateringDetailsOpen] = useState(false);
@@ -51,6 +103,7 @@ export default function HomePage() {
   const [isConsultingDetailsOpen, setIsConsultingDetailsOpen] = useState(false);
   const [activeTeamMember, setActiveTeamMember] = useState<number | null>(null);
   const { t } = useLanguage();
+  // Payload data available: payloadData?.layout
 
   const aboutPoints = [
     { title: t("about.points.1.title"), text: t("about.points.1.text") },
@@ -87,7 +140,7 @@ export default function HomePage() {
             {t("hero.title")}
           </motion.h1>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 1 }} className="text-xl md:text-2xl font-light tracking-[0.2em] mb-8 text-gray-200">
-            {t("hero.subtitle")}
+            {heroBlock?.subheading ?? t("hero.subtitle")}
           </motion.p>
           <motion.button
             initial={{ opacity: 0, scale: 0.9 }}
@@ -345,13 +398,19 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h3 className="text-white font-serif text-xl">{member.name}</h3>
-                  <p className="text-[#C0A07B] text-xs tracking-widest mt-1">{t(member.roleKey)}</p>
+                  <p className="text-[#C0A07B] text-xs tracking-widest mt-1">{teamBlock?.members?.length ? member.roleKey : t(member.roleKey)}</p>
                 </div>
                 <div className={`absolute inset-0 bg-black/80 flex flex-col justify-center items-center p-8 text-center transition-all duration-500 ${activeTeamMember === i ? "opacity-100 visible" : "opacity-0 invisible group-hover:opacity-100 group-hover:visible"}`}>
                   <h3 className="text-white font-serif text-xl mb-2">{member.name}</h3>
-                  <p className="text-[#C0A07B] text-xs tracking-widest mb-4">{t(member.roleKey)}</p>
+                  <p className="text-[#C0A07B] text-xs tracking-widest mb-4">{teamBlock?.members?.length ? member.roleKey : t(member.roleKey)}</p>
                   <p className="text-gray-300 text-sm font-light leading-relaxed">
-                    {activeTeamMember === i ? t(member.fullBioKey) : t(member.bioKey)}
+                    {teamBlock?.members?.length
+                      ? activeTeamMember === i
+                        ? member.fullBioKey
+                        : member.bioKey
+                      : activeTeamMember === i
+                        ? t(member.fullBioKey)
+                        : t(member.bioKey)}
                   </p>
                 </div>
               </motion.div>

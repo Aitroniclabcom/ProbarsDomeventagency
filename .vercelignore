@@ -1,0 +1,7 @@
+# If payload migrate fails on Vercel because migration metadata is missing, remove migrations/*.json from this file.
+.next
+node_modules
+.env.local
+migrations/*.json
+scripts/
+attached_assets/

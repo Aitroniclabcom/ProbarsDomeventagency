@@ -1,4 +1,4 @@
-import type { Locale } from "@/context/LanguageContext";
+import type { Language } from "@/i18n/translations";
 
 // ─── WooCommerce Store API Response Types ──────────────────────────────────
 
@@ -137,13 +137,13 @@ function getLocalizedField(
   defaultValue: string,
   metaData: Array<{ key: string; value: string }> | undefined,
   fieldName: string,
-  locale: Locale
+  locale: Language
 ): string {
   const localeKey = `${fieldName}_${locale}`;
   return getMetaValue(metaData, localeKey) || defaultValue;
 }
 
-export function mapWCProductToFrontend(product: WCStoreProduct, locale: Locale = "en"): FrontendProduct {
+export function mapWCProductToFrontend(product: WCStoreProduct, locale: Language = "en"): FrontendProduct {
   const metaData = product.meta_data || [];
   const price = parseFloat(product.price || product.regular_price || "0");
   const regularPrice = parseFloat(product.regular_price || "0");

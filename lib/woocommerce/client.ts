@@ -11,15 +11,12 @@ export class WooCommerceStoreAPI {
     this.baseUrl = `${WC_URL}/wp-json/wc/store/v1`;
   }
 
-  private async fetch<T>(
-    endpoint: string,
-    options?: RequestInit & { headers?: Record<string, string> }
-  ): Promise<T> {
+  private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    };
+    const headers = new Headers({ "Content-Type": "application/json" });
+    if (options?.headers) {
+      new Headers(options.headers).forEach((value, key) => headers.set(key, value));
+    }
 
     const response = await fetch(url, {
       ...options,

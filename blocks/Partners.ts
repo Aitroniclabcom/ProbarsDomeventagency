@@ -1,10 +1,10 @@
 import type { Block } from 'payload'
 
-export const Partners: Block = {
+export const PartnersBlock: Block = {
   slug: 'partners',
   labels: { singular: 'Partneri', plural: 'Partneru sadaļas' },
   fields: [
-    { name: 'heading', type: 'text' },
+    { name: 'heading', type: 'text', localized: true },
     {
       name: 'partners',
       type: 'array',

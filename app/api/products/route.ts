@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchProducts } from "@/lib/woocommerce/store-api";
-import type { Locale } from "@/context/LanguageContext";
+import type { Language } from "@/i18n/translations";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const locale = (searchParams.get("locale") ?? "en") as Locale;
+    const locale = (searchParams.get("locale") ?? "en") as Language;
     const search = searchParams.get("search") ?? undefined;
     const per_page = Number(searchParams.get("per_page") ?? 20);
     const page = Number(searchParams.get("page") ?? 1);

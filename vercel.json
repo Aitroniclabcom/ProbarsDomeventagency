@@ -1,3 +1,9 @@
 {
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "buildCommand": "PAYLOAD_CONFIG_PATH=payload.config.ts npx tsx node_modules/payload/bin.js migrate && next build",
+  "functions": {
+    "app/**/*": {
+      "maxDuration": 30
+    }
+  }
 }

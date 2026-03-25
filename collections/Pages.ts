@@ -1,11 +1,11 @@
 import type { CollectionConfig } from 'payload'
-import { Hero } from '../blocks/Hero'
-import { RichText } from '../blocks/RichText'
-import { Team } from '../blocks/Team'
-import { Gallery } from '../blocks/Gallery'
-import { Partners } from '../blocks/Partners'
-import { Cta } from '../blocks/Cta'
-import { EventBuilder } from '../blocks/EventBuilder'
+import { HeroBlock } from '../blocks/Hero'
+import { RichTextBlock } from '../blocks/RichText'
+import { TeamBlock } from '../blocks/Team'
+import { GalleryBlock } from '../blocks/Gallery'
+import { CTABlock } from '../blocks/Cta'
+import { PartnersBlock } from '../blocks/Partners'
+import { EventBuilderBlock } from '../blocks/EventBuilder'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -13,31 +13,34 @@ export const Pages: CollectionConfig = {
     useAsTitle: 'title',
   },
   fields: [
-    {
-      name: 'title',
-      type: 'text',
-      required: true,
-    },
+    { name: 'title', type: 'text', required: true, localized: true },
     {
       name: 'slug',
       type: 'text',
       required: true,
       unique: true,
-      admin: {
-        position: 'sidebar',
-      },
+      admin: { position: 'sidebar' },
     },
     {
       name: 'layout',
       type: 'blocks',
-      blocks: [Hero, RichText, Team, Gallery, Cta, Partners, EventBuilder],
+      localized: true,
+      blocks: [
+        HeroBlock,
+        RichTextBlock,
+        TeamBlock,
+        GalleryBlock,
+        CTABlock,
+        PartnersBlock,
+        EventBuilderBlock,
+      ],
     },
     {
       name: 'seo',
       type: 'group',
       fields: [
-        { name: 'title', type: 'text' },
-        { name: 'description', type: 'textarea' },
+        { name: 'title', type: 'text', localized: true },
+        { name: 'description', type: 'textarea', localized: true },
       ],
     },
   ],

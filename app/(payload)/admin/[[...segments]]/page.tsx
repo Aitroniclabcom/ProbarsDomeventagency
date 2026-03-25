@@ -13,5 +13,5 @@ export default function Page({ params, searchParams }: Args) {
 }
 
 export async function generateMetadata({ params, searchParams }: Args): Promise<Metadata> {
-  return generatePageMetadata({ config, importMap, params, searchParams })
+  return generatePageMetadata({ config, params, searchParams })
 }

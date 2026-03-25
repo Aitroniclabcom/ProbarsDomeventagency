@@ -44,6 +44,11 @@
   "exclude": [
     "node_modules",
     "client",
-    "server"
+    "server",
+    "apps",
+    "migrations",
+    "packages",
+    "scripts",
+    "shared"
   ]
 }
