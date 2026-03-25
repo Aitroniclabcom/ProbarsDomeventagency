@@ -1,142 +1,100 @@
-# VPS Deployment Guide - D.O.M. Event Agency
+# VPS Deployment Guide — D.O.M. Event Agency
 
-## Prerequisites
+## Server Requirements
+- Ubuntu 20.04+
+- Node.js 20+
+- PM2
+- Nginx
+- Certbot (Let's Encrypt)
 
-- Node.js 20+ installed
-- PostgreSQL database (local or remote)
-- npm or yarn package manager
+## Initial Server Setup
 
-## Step 1: Clone and Install
-
+### 1. Install Node.js 20
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd dom-event-agency
-
-# Install dependencies
-npm install
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 ```
 
-## Step 2: Configure Environment Variables
-
+### 2. Install PM2
 ```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Edit the .env file with your values
-nano .env
+sudo npm install -g pm2
 ```
 
-### Required Environment Variables:
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/domdb` |
-| `ADMIN_PASSWORD` | Password for /admin panel (username: admin) | `YourSecurePassword123` |
-| `SESSION_SECRET` | Random string for session encryption | `openssl rand -base64 32` |
-| `PORT` | Server port (optional, default 5000) | `5000` |
-
-## Step 3: Setup Database
-
+### 3. Install Nginx
 ```bash
-# Push the database schema
-npm run db:push
+sudo apt update
+sudo apt install nginx
 ```
 
-This will create all necessary tables in your PostgreSQL database.
-
-## Step 4: Build for Production
-
+### 4. Install Certbot
 ```bash
-# Build the application
+sudo apt install certbot python3-certbot-nginx
+```
+
+### 5. Clone repository
+```bash
+sudo mkdir -p /var/www/domeventagency
+sudo chown $USER:$USER /var/www/domeventagency
+git clone https://github.com/YOUR_REPO /var/www/domeventagency
+cd /var/www/domeventagency
+```
+
+### 6. Create .env.local
+```bash
+cp .env.example .env.local
+nano .env.local
+# Fill in all values
+```
+
+### 7. Install dependencies
+```bash
+npm install --legacy-peer-deps
+```
+
+### 8. Run migrations
+```bash
+export PATH="$(pwd)/node_modules/.bin:$PATH"
+export PAYLOAD_CONFIG_PATH=payload.config.ts
+cross-env NODE_OPTIONS=--no-deprecation npx tsx node_modules/payload/bin.js migrate
+```
+
+### 9. Build
+```bash
 npm run build
 ```
 
-This creates optimized production files in the `dist/` folder.
-
-## Step 5: Start the Server
-
+### 10. Start with PM2
 ```bash
-# Start in production mode
-npm run start
-```
-
-The server will run on port 5000 (or your configured PORT).
-
-## Production Setup with PM2
-
-For production, use PM2 to keep the app running:
-
-```bash
-# Install PM2 globally
-npm install -g pm2
-
-# Start the application
-pm2 start npm --name "dom-agency" -- run start
-
-# Save PM2 process list
+pm2 start ecosystem.config.cjs
 pm2 save
-
-# Setup PM2 to start on boot
 pm2 startup
+# Run the command that PM2 outputs
 ```
 
-## Nginx Reverse Proxy (Recommended)
-
-Create `/etc/nginx/sites-available/dom-agency`:
-
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-Enable the site:
-
+### 11. Configure Nginx
 ```bash
-sudo ln -s /etc/nginx/sites-available/dom-agency /etc/nginx/sites-enabled/
+sudo cp nginx/domeventagency.conf /etc/nginx/sites-available/domeventagency
+sudo ln -s /etc/nginx/sites-available/domeventagency /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-## SSL with Let's Encrypt
-
+### 12. SSL Certificate
 ```bash
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d yourdomain.com
+sudo certbot --nginx -d domeventagency.com -d www.domeventagency.com
 ```
 
-## Admin Panel Access
+## Updating (after initial setup)
+```bash
+cd /var/www/domeventagency
+bash scripts/deploy.sh
+```
 
-After deployment, access the admin panel at:
-- URL: `https://yourdomain.com/admin`
-- Username: `admin`
-- Password: Your `ADMIN_PASSWORD` value
-
-## Troubleshooting
-
-### Database Connection Issues
-- Ensure PostgreSQL is running: `sudo systemctl status postgresql`
-- Check DATABASE_URL format
-- Verify network connectivity to database server
-
-### Port Already in Use
-- Change PORT in .env file
-- Or stop conflicting service: `sudo lsof -i :5000`
-
-### Build Errors
-- Clear node_modules: `rm -rf node_modules && npm install`
-- Check Node.js version: `node --version` (need 20+)
+## Useful Commands
+```bash
+pm2 status              # Check app status
+pm2 logs domeventagency # View logs
+pm2 restart domeventagency # Restart app
+sudo nginx -t           # Test nginx config
+sudo systemctl reload nginx # Reload nginx
+```
