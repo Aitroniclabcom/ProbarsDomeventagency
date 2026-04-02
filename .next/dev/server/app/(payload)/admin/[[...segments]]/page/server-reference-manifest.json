@@ -1,0 +1,29 @@
+{
+  "node": {
+    "408eb178095cf11ddd3de262a539aa19456b880f80": {
+      "workers": {
+        "app/(payload)/admin/[[...segments]]/page": {
+          "moduleId": "[project]/Documents/GitHub/Probars/.next-internal/server/app/(payload)/admin/[[...segments]]/page/actions.js { ACTIONS_MODULE0 => \"[project]/Documents/GitHub/Probars/app/(payload)/layout.tsx [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/Documents/GitHub/Probars/node_modules/@payloadcms/next/dist/layouts/Root/index.js [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": true,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "Documents/GitHub/Probars/app/(payload)/layout.tsx"
+        }
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "Documents/GitHub/Probars/app/(payload)/layout.tsx"
+    },
+    "6005703681be5ba256d32a8b7451e00618dec25742": {
+      "workers": {
+        "app/(payload)/admin/[[...segments]]/page": {
+          "moduleId": "[project]/Documents/GitHub/Probars/.next-internal/server/app/(payload)/admin/[[...segments]]/page/actions.js { ACTIONS_MODULE0 => \"[project]/Documents/GitHub/Probars/app/(payload)/layout.tsx [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/Documents/GitHub/Probars/node_modules/@payloadcms/next/dist/layouts/Root/index.js [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": true,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "Documents/GitHub/Probars/node_modules/@payloadcms/next/dist/layouts/Root/index.js"
+        }
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "Documents/GitHub/Probars/node_modules/@payloadcms/next/dist/layouts/Root/index.js"
+    }
+  },
+  "edge": {}
+}

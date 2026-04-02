@@ -1,0 +1,30 @@
+{
+  "node": {
+    "4079725ecdb65f6a26a9133f5f69506f550ac41a61": {
+      "workers": {
+        "app/(payload)/admin/[[...segments]]/page": {
+          "moduleId": 22893,
+          "async": true,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "Documents/GitHub/Probars/app/(payload)/layout.tsx"
+        }
+      },
+      "filename": "Documents/GitHub/Probars/app/(payload)/layout.tsx",
+      "exportedName": "$$RSC_SERVER_ACTION_0"
+    },
+    "60d7851de21ccd08db319ad94b03a26bc9d3e4f525": {
+      "workers": {
+        "app/(payload)/admin/[[...segments]]/page": {
+          "moduleId": 22893,
+          "async": true,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "Documents/GitHub/Probars/node_modules/@payloadcms/next/dist/layouts/Root/index.js"
+        }
+      },
+      "filename": "Documents/GitHub/Probars/node_modules/@payloadcms/next/dist/layouts/Root/index.js",
+      "exportedName": "$$RSC_SERVER_ACTION_0"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "U6oxZt8FNlhcyQwJrR0qvymJB77mOSheedSwyj8RXfM="
+}

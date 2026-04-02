@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 46, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/kklau/Documents/GitHub/Probars/app/api/settings/public/route.ts"],"sourcesContent":["import { NextResponse } from 'next/server'\n\nexport async function GET() {\n  return NextResponse.json({ blogInMenu: false })\n}\n"],"names":["GET","json","blogInMenu"],"mappings":";;;;AAAA;;AAEO,eAAeA;IACpB,OAAO,kLAAY,CAACC,IAAI,CAAC;QAAEC,YAAY;IAAM;AAC/C"}}]
+}

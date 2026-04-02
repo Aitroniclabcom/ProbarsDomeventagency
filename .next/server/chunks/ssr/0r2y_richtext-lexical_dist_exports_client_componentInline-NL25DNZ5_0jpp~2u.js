@@ -1,0 +1,3 @@
+module.exports=[10531,a=>a.a(async(b,c)=>{try{var d=a.i(58481),e=b([d]);[d]=e.then?(await e)():e,a.s([]),c()}catch(a){c(a)}},!1),92103,a=>a.a(async(b,c)=>{try{var d=a.i(10531),e=a.i(58481),f=b([d,e]);[d,e]=f.then?(await f)():f,a.s(["InlineBlockComponent",()=>e.b,"useInlineBlockComponentContext",()=>e.a]),c()}catch(a){c(a)}},!1)];
+
+//# sourceMappingURL=0r2y_richtext-lexical_dist_exports_client_componentInline-NL25DNZ5_0jpp~2u.js.map

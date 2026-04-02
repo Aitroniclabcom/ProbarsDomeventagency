@@ -1,0 +1,12 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/(payload)/api/[...slug]/route.js")
+R.c("server/chunks/[externals]_next_dist_compiled_@vercel_og_index_node_0mj6r_z.js")
+R.c("server/chunks/0tbb_next_0fkx4tu._.js")
+R.c("server/chunks/0tbb_@payloadcms_richtext-lexical_dist_0nkwy3q._.js")
+R.c("server/chunks/0tbb_lexical_Lexical_dev_mjs_05rhnl8._.js")
+R.c("server/chunks/0tbb_@payloadcms_ui_dist_12dv3lm._.js")
+R.c("server/chunks/0f5u_date-fns_079szod._.js")
+R.c("server/chunks/[root-of-the-server]__0dsno3m._.js")
+R.c("server/chunks/[root-of-the-server]__00h_f-y._.js")
+R.c("server/chunks/0ksd_Probars__next-internal_server_app_(payload)_api_[___slug]_route_actions_07r.12w.js")
+R.m("[project]/Documents/GitHub/Probars/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/Documents/GitHub/Probars/app/(payload)/api/[...slug]/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)")
+module.exports=R.m("[project]/Documents/GitHub/Probars/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/Documents/GitHub/Probars/app/(payload)/api/[...slug]/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)").exports

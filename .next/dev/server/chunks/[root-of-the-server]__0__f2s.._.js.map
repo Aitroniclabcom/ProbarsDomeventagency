@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 60, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/kklau/Documents/GitHub/Probars/app/%28payload%29/api/%5B...slug%5D/route.ts"],"sourcesContent":["import config from '@payload-config'\nimport { REST_DELETE, REST_GET, REST_OPTIONS, REST_PATCH, REST_POST, REST_PUT } from '@payloadcms/next/routes'\n\nexport const GET = REST_GET(config)\nexport const POST = REST_POST(config)\nexport const DELETE = REST_DELETE(config)\nexport const PATCH = REST_PATCH(config)\nexport const PUT = REST_PUT(config)\nexport const OPTIONS = REST_OPTIONS(config)\r\n"],"names":["GET","config","POST","DELETE","PATCH","PUT","OPTIONS"],"mappings":";;;;;;;;;;;;;;;;;;;AACA;AAAA;AAAA;AAAA;AAAA;AAAA;;;;;;;;;;;;AAEO,MAAMA,MAAM,IAAA,0PAAQ,EAACC;AACrB,MAAMC,OAAO,IAAA,6PAAS,EAACD;AACvB,MAAME,SAAS,IAAA,mQAAW,EAACF;AAC3B,MAAMG,QAAQ,IAAA,gQAAU,EAACH;AACzB,MAAMI,MAAM,IAAA,0PAAQ,EAACJ;AACrB,MAAMK,UAAU,IAAA,sQAAY,EAACL"}}]
+}
