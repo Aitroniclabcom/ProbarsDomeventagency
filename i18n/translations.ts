@@ -40,7 +40,7 @@ export const translations = {
         checkout: "NOFORMĒT PIRKUMU"
       }
     },
-    tscheckout: {
+    checkout: {
       title: "Checkout",
       billing: "Norēķinu informācija",
       firstName: "Vārds",
@@ -271,7 +271,7 @@ export const translations = {
         checkout: "ОФОРМИТЬ ЗАКАЗ"
       }
     },
-    tscheckout: {
+    checkout: {
       title: "Оформление заказа",
       billing: "Платёжные данные",
       firstName: "Имя",
@@ -502,7 +502,7 @@ export const translations = {
         checkout: "CHECKOUT"
       }
     },
-    tscheckout: {
+    checkout: {
       title: "Checkout",
       billing: "Billing details",
       firstName: "First name",
