@@ -10,7 +10,10 @@ export class WooCommerceStoreAPI {
 
   private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers = new Headers({ "Content-Type": "application/json" });
+    const headers = new Headers({
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    });
     if (options?.headers) {
       new Headers(options.headers).forEach((value, key) => headers.set(key, value));
     }
@@ -18,17 +21,37 @@ export class WooCommerceStoreAPI {
     const response = await fetch(url, {
       ...options,
       headers,
-      // Server-side calls to another host: no cookies; avoid Next data cache stale/empty Woo responses
       credentials: "omit",
       cache: "no-store",
     });
 
+    const body = (await response.text()).replace(/^\uFEFF/, "").trim();
+
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`WooCommerce API error ${response.status}: ${error}`);
+      const preview = body.slice(0, 400).replace(/\s+/g, " ");
+      const hint =
+        body.startsWith("<") || body.startsWith("<!")
+          ? " (response is HTML — wrong WOOCOMMERCE_URL or REST blocked?)"
+          : "";
+      throw new Error(`WooCommerce HTTP ${response.status}${hint}: ${preview || "(empty)"}`);
     }
 
-    return response.json() as Promise<T>;
+    if (!body) {
+      throw new Error(`WooCommerce empty response (HTTP ${response.status}) from ${url}`);
+    }
+
+    if (body.startsWith("<") || body.startsWith("<!")) {
+      throw new Error(
+        `WooCommerce returned HTML instead of JSON (requested ${url}). Set WOOCOMMERCE_URL / NEXT_PUBLIC_WOOCOMMERCE_URL to the WordPress site that hosts the shop — the URL whose /wp-json/wc/store/v1/products opens as JSON in a browser — not the Next.js marketing domain unless WordPress runs there.`
+      );
+    }
+
+    try {
+      return JSON.parse(body) as T;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "parse error";
+      throw new Error(`WooCommerce invalid JSON from ${url} (HTTP ${response.status}): ${msg}`);
+    }
   }
 
   // Products
