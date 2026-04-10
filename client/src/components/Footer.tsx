@@ -8,8 +8,8 @@ export function Footer() {
   return (
     <footer id="contacts" className="bg-black py-20 text-white border-t border-[#333]">
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 gap-x-0 gap-y-8 lg:gap-12 lg:grid-cols-2 items-start">
-          <div className="order-1 lg:col-start-1 lg:row-start-1">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12 items-start">
+          <div>
             <h2 className="text-4xl font-serif mb-6 whitespace-pre-line">{t("footer.title")}</h2>
             <p className="font-light text-gray-400 max-w-md mb-8">
               {t("footer.desc")}
@@ -32,19 +32,21 @@ export function Footer() {
                  <Facebook size={20} />
                </a>
             </div>
-          </div>
-
-          <div className="order-2 lg:col-start-2 lg:row-start-1 flex w-full flex-col gap-4 font-light text-left lg:text-right lg:items-end">
-             <a href="mailto:d.o.m.eventagency@gmail.com" className="text-xl hover:text-[#C0A07B] transition-colors">d.o.m.eventagency@gmail.com</a>
-             <a href="tel:+37126178575" className="text-xl hover:text-[#C0A07B] transition-colors">(+371) 26178575</a>
-          </div>
-
-          <div className="order-3 lg:col-start-1 lg:row-start-2 text-xs text-gray-500 font-light leading-relaxed">
+            <div className="mt-4 flex flex-col gap-4 font-light lg:hidden">
+              <a href="mailto:d.o.m.eventagency@gmail.com" className="text-left text-xl hover:text-[#C0A07B] transition-colors">d.o.m.eventagency@gmail.com</a>
+              <a href="tel:+37126178575" className="text-left text-xl hover:text-[#C0A07B] transition-colors">(+371) 26178575</a>
+            </div>
+            <div className="mt-10 text-xs text-gray-500 font-light leading-relaxed lg:mt-12">
               <p className="font-medium text-gray-400 mb-2">{t("footer.details.title")}</p>
               <p>{t("footer.details.name")}</p>
               <p>{t("footer.details.reg")}</p>
               <p>{t("footer.details.address")}</p>
               <p>{t("footer.details.bank")}</p>
+            </div>
+          </div>
+          <div className="hidden lg:flex flex-col gap-4 font-light text-right items-end self-start text-xl">
+            <a href="mailto:d.o.m.eventagency@gmail.com" className="hover:text-[#C0A07B] transition-colors">d.o.m.eventagency@gmail.com</a>
+            <a href="tel:+37126178575" className="hover:text-[#C0A07B] transition-colors">(+371) 26178575</a>
           </div>
         </div>
         
