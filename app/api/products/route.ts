@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchProducts } from "@/lib/woocommerce/store-api";
-import type { Language } from "@/i18n/translations";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const locale = (searchParams.get("locale") ?? "en") as Language;
     const search = searchParams.get("search") ?? undefined;
     const per_page = Number(searchParams.get("per_page") ?? 20);
     const page = Number(searchParams.get("page") ?? 1);
 
-    const products = await fetchProducts(locale, { per_page, page, search });
+    // `locale` query is ignored: WooCommerce has a single default catalog language.
+    const products = await fetchProducts({ per_page, page, search });
     return NextResponse.json(products);
   } catch (error: any) {
     console.error("[WooCommerce] GET /api/products:", error.message);

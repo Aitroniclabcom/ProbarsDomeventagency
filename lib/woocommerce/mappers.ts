@@ -1,5 +1,3 @@
-import type { Language } from "@/i18n/translations";
-
 // ─── WooCommerce Store API Response Types ──────────────────────────────────
 
 /** Current Store API shape (prices in minor units) + legacy flat fields */
@@ -29,7 +27,7 @@ export type WCStoreProduct = {
   stock_quantity?: number | null;
   images?: Array<{ src: string; alt?: string }>;
   categories?: Array<{ id: number; name: string; slug: string }>;
-  meta_data?: Array<{ key: string; value: string }>;
+  meta_data?: Array<{ key: string; value: unknown }> | unknown;
   sku?: string;
 };
 
@@ -143,18 +141,35 @@ export type FrontendCart = {
 
 // ─── Mapper Functions ──────────────────────────────────────────────────────
 
-function getMetaValue(metaData: Array<{ key: string; value: string }> | undefined, key: string): string | null {
-  return metaData?.find((m) => m.key === key || m.key === `_${key}`)?.value ?? null;
+/** Store API may omit meta_data or send a non-array; Woo is single-language here — no title_lv / short_desc_ru etc. */
+function normalizeMetaData(raw: WCStoreProduct["meta_data"]): Array<{ key: string; value: unknown }> {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((m): m is { key: string; value: unknown } => m != null && typeof (m as { key?: string }).key === "string");
 }
 
-function getLocalizedField(
-  defaultValue: string,
-  metaData: Array<{ key: string; value: string }> | undefined,
-  fieldName: string,
-  locale: Language
-): string {
-  const localeKey = `${fieldName}_${locale}`;
-  return getMetaValue(metaData, localeKey) || defaultValue;
+function getMetaString(metaData: Array<{ key: string; value: unknown }>, key: string): string | null {
+  const raw = metaData.find((m) => m.key === key || m.key === `_${key}`)?.value;
+  if (raw == null) return null;
+  if (typeof raw === "string") return raw;
+  if (typeof raw === "number" || typeof raw === "boolean") return String(raw);
+  return null;
+}
+
+function metaToRecord(metaData: Array<{ key: string; value: unknown }>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const m of metaData) {
+    const v = m.value;
+    if (v == null) out[m.key] = "";
+    else if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") out[m.key] = String(v);
+    else {
+      try {
+        out[m.key] = JSON.stringify(v);
+      } catch {
+        out[m.key] = "";
+      }
+    }
+  }
+  return out;
 }
 
 function minorUnitToMajor(amount: string, minorUnit: number): number {
@@ -163,8 +178,8 @@ function minorUnitToMajor(amount: string, minorUnit: number): number {
   return n / 10 ** minorUnit;
 }
 
-export function mapWCProductToFrontend(product: WCStoreProduct, locale: Language = "en"): FrontendProduct {
-  const metaData = product.meta_data || [];
+export function mapWCProductToFrontend(product: WCStoreProduct): FrontendProduct {
+  const metaData = normalizeMetaData(product.meta_data);
 
   let price: number;
   let regularPrice: number;
@@ -199,25 +214,25 @@ export function mapWCProductToFrontend(product: WCStoreProduct, locale: Language
     product.on_sale === true || (salePrice !== null && salePrice < regularPrice && regularPrice > 0);
 
   return {
-    id: String(product.id),
-    slug: product.slug,
+    id: String(product.id ?? ""),
+    slug: product.slug ?? String(product.id ?? ""),
     sku: product.sku ?? "",
-    name: getLocalizedField(product.name, metaData, "title", locale),
-    shortDescription: getLocalizedField(shortSource, metaData, "short_desc", locale),
-    description: getLocalizedField(descSource, metaData, "long_desc", locale),
+    name: String(product.name ?? ""),
+    shortDescription: String(shortSource),
+    description: String(descSource),
     price,
     regularPrice,
     salePrice,
     currencyCode,
     stockStatus,
     isOnSale,
-    isFeatured: getMetaValue(metaData, "featured") === "yes" || getMetaValue(metaData, "_featured") === "yes",
+    isFeatured:
+      getMetaString(metaData, "featured") === "yes" || getMetaString(metaData, "_featured") === "yes",
     image: product.images?.[0]?.src || null,
-    gallery: product.images?.map((img) => img.src) || [],
+    gallery: (product.images ?? []).map((img) => img.src).filter((src): src is string => Boolean(src)),
     categoryIds: product.categories?.map((cat) => cat.id) || [],
-    categoryNames:
-      product.categories?.map((cat) => getLocalizedField(cat.name, metaData, `cat_${cat.id}`, locale)) || [],
-    meta: Object.fromEntries(metaData.map((m) => [m.key, String(m.value)])),
+    categoryNames: product.categories?.map((cat) => String(cat.name ?? "")) || [],
+    meta: metaToRecord(metaData),
   };
 }
 

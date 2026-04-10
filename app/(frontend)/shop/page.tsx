@@ -18,9 +18,9 @@ export default function ShopPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const { data: products = [], isLoading, isError } = useQuery<FrontendProduct[]>({
-    queryKey: ["products", language],
+    queryKey: ["products"],
     queryFn: async () => {
-      const res = await fetch(`/api/products?locale=${language}`);
+      const res = await fetch("/api/products");
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },

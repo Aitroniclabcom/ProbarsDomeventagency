@@ -19,14 +19,14 @@ export default function ShopProductPage() {
   const slug = typeof slugParam === "string" ? slugParam : Array.isArray(slugParam) ? slugParam[0] : "";
 
   const { addToCart } = useCart();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [quantity, setQuantity] = useState(1);
 
   const { data: product, isLoading, isError } = useQuery<FrontendProduct | null>({
-    queryKey: ["product", slug, language],
+    queryKey: ["product", slug],
     queryFn: async () => {
       if (!slug) return null;
-      const res = await fetch(`/api/products/${encodeURIComponent(slug)}?locale=${language}`);
+      const res = await fetch(`/api/products/${encodeURIComponent(slug)}`);
       if (res.status === 404) return null;
       if (!res.ok) throw new Error("Failed to fetch product");
       return res.json();

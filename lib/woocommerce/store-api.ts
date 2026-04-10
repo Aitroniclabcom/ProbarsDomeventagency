@@ -7,7 +7,6 @@ import {
   type WCStoreProduct,
   type WCStoreCart,
 } from "./mappers";
-import type { Language } from "@/i18n/translations";
 
 function normalizeProductListResponse(response: unknown): unknown[] {
   if (Array.isArray(response)) return response;
@@ -19,16 +18,23 @@ function normalizeProductListResponse(response: unknown): unknown[] {
   return [];
 }
 
-export async function fetchProducts(locale: Language = "en", params?: { per_page?: number; page?: number; search?: string }) {
+export async function fetchProducts(params?: { per_page?: number; page?: number; search?: string }) {
   const response = await wcAPI.getProducts(params);
   const products = normalizeProductListResponse(response);
-  return products.map((p) => mapWCProductToFrontend(p as WCStoreProduct, locale));
+  return products.flatMap((p) => {
+    try {
+      return [mapWCProductToFrontend(p as WCStoreProduct)];
+    } catch (err) {
+      console.error("[WooCommerce] map product skipped:", err);
+      return [];
+    }
+  });
 }
 
-export async function fetchProductBySlug(slug: string, locale: Language = "en"): Promise<FrontendProduct | null> {
+export async function fetchProductBySlug(slug: string): Promise<FrontendProduct | null> {
   try {
     const product = (await wcAPI.getProduct(slug)) as WCStoreProduct;
-    return mapWCProductToFrontend(product, locale);
+    return mapWCProductToFrontend(product);
   } catch (error) {
     console.error(`Failed to fetch product ${slug}:`, error);
     return null;
