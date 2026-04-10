@@ -273,60 +273,50 @@ async function seed() {
     ],
   }
 
+  let homeId: string | number
+
   if (existing.docs.length > 0) {
+    homeId = existing.docs[0].id
     await payload.update({
       collection: 'pages',
-      id: existing.docs[0].id,
+      id: homeId,
       data: homeData,
     })
     console.log('Homepage updated.')
   } else {
-    await payload.create({
+    const created = await payload.create({
       collection: 'pages',
       data: homeData,
     })
+    homeId = created.id
     console.log('Homepage created.')
   }
 
+  // Always write ru/en by document id — find({ locale }) can return 0 rows on fresh DB,
+  // which previously skipped localized layout entirely.
   console.log('Seeding Russian locale...')
-  const existingRu = await payload.find({
+  await payload.update({
     collection: 'pages',
-    where: { slug: { equals: 'home' } },
+    id: homeId,
     locale: 'ru',
-    limit: 1,
+    data: {
+      title: '\u0413\u043b\u0430\u0432\u043d\u0430\u044f \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0430',
+      layout: getLayoutForLocale('ru'),
+    },
   })
-  if (existingRu.docs.length > 0) {
-    await payload.update({
-      collection: 'pages',
-      id: existingRu.docs[0].id,
-      locale: 'ru',
-      data: {
-        title: '\u0413\u043b\u0430\u0432\u043d\u0430\u044f \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0430',
-        layout: getLayoutForLocale('ru'),
-      },
-    })
-    console.log('Russian locale updated.')
-  }
+  console.log('Russian locale updated.')
 
   console.log('Seeding English locale...')
-  const existingEn = await payload.find({
+  await payload.update({
     collection: 'pages',
-    where: { slug: { equals: 'home' } },
+    id: homeId,
     locale: 'en',
-    limit: 1,
+    data: {
+      title: 'Homepage',
+      layout: getLayoutForLocale('en'),
+    },
   })
-  if (existingEn.docs.length > 0) {
-    await payload.update({
-      collection: 'pages',
-      id: existingEn.docs[0].id,
-      locale: 'en',
-      data: {
-        title: 'Homepage',
-        layout: getLayoutForLocale('en'),
-      },
-    })
-    console.log('English locale updated.')
-  }
+  console.log('English locale updated.')
 
   console.log('Seed complete!')
   process.exit(0)

@@ -12,6 +12,11 @@ export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     useAsTitle: 'title',
+    description:
+      'Sākumlapa: viens dokuments ar slug `home`. Ja kolekcija ir tukša, serverī palaid `npm run seed` (ar pareizu DATABASE_URL).',
+  },
+  access: {
+    read: () => true,
   },
   fields: [
     { name: 'title', type: 'text', required: true, localized: true },
