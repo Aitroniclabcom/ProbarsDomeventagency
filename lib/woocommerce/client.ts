@@ -1,15 +1,7 @@
-import { getWooCommerceBaseUrl } from "./config";
+import { getWooCommerceStoreRootCandidates } from "./config";
 
 export class WooCommerceStoreAPI {
-  private baseUrl: string;
-
-  constructor() {
-    const root = getWooCommerceBaseUrl();
-    this.baseUrl = `${root}/wp-json/wc/store/v1`;
-  }
-
-  private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
+  private async fetchOnce<T>(url: string, options?: RequestInit): Promise<T> {
     const headers = new Headers({
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -31,7 +23,7 @@ export class WooCommerceStoreAPI {
       const preview = body.slice(0, 400).replace(/\s+/g, " ");
       const hint =
         body.startsWith("<") || body.startsWith("<!")
-          ? " (response is HTML — wrong WOOCOMMERCE_URL or REST blocked?)"
+          ? " (response is HTML — wrong store URL or REST blocked?)"
           : "";
       throw new Error(`WooCommerce HTTP ${response.status}${hint}: ${preview || "(empty)"}`);
     }
@@ -41,9 +33,7 @@ export class WooCommerceStoreAPI {
     }
 
     if (body.startsWith("<") || body.startsWith("<!")) {
-      throw new Error(
-        `WooCommerce returned HTML instead of JSON (requested ${url}). Set WOOCOMMERCE_URL / NEXT_PUBLIC_WOOCOMMERCE_URL to the WordPress site that hosts the shop — the URL whose /wp-json/wc/store/v1/products opens as JSON in a browser — not the Next.js marketing domain unless WordPress runs there.`
-      );
+      throw new Error(`WooCommerce returned HTML instead of JSON (requested ${url})`);
     }
 
     try {
@@ -54,7 +44,26 @@ export class WooCommerceStoreAPI {
     }
   }
 
-  // Products
+  /** Try every configured WordPress root until Store API returns valid JSON. */
+  private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const roots = getWooCommerceStoreRootCandidates();
+    const errors: string[] = [];
+    for (const root of roots) {
+      const baseUrl = `${root}/wp-json/wc/store/v1`;
+      const url = `${baseUrl}${endpoint}`;
+      try {
+        return await this.fetchOnce<T>(url, options);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        errors.push(`${root}: ${msg.slice(0, 240)}`);
+        console.error(`[WooCommerce Store API] failed for ${root}`, msg);
+      }
+    }
+    throw new Error(
+      `WooCommerce Store API failed for all URLs [${roots.join(", ")}]. ${errors.join(" || ")}`
+    );
+  }
+
   async getProducts(params?: { per_page?: number; page?: number; search?: string }) {
     const searchParams = new URLSearchParams({
       per_page: String(params?.per_page ?? 20),
@@ -65,15 +74,13 @@ export class WooCommerceStoreAPI {
   }
 
   async getProduct(id: string) {
-    return this.fetch(`/products/${id}`);
+    return this.fetch(`/products/${encodeURIComponent(id)}`);
   }
 
-  // Categories
   async getCategories() {
     return this.fetch("/products/categories");
   }
 
-  // Cart
   async getCart() {
     return this.fetch("/cart");
   }
@@ -86,21 +93,20 @@ export class WooCommerceStoreAPI {
   }
 
   async updateCartItem(key: string, quantity: number) {
-    return this.fetch(`/cart/update-item/${key}`, {
+    return this.fetch(`/cart/update-item/${encodeURIComponent(key)}`, {
       method: "POST",
       body: JSON.stringify({ quantity }),
     });
   }
 
   async removeFromCart(key: string) {
-    return this.fetch(`/cart/remove-item/${key}`, { method: "POST" });
+    return this.fetch(`/cart/remove-item/${encodeURIComponent(key)}`, { method: "POST" });
   }
 
   async clearCart() {
     return this.fetch("/cart/items", { method: "DELETE" });
   }
 
-  // Checkout
   async getCheckout() {
     return this.fetch("/checkout");
   }

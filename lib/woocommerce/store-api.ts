@@ -7,6 +7,7 @@ import {
   type WCStoreProduct,
   type WCStoreCart,
 } from "./mappers";
+import { fetchProductsViaWooRestV3, fetchProductBySlugViaWooRestV3 } from "./rest-v3-products";
 
 function normalizeProductListResponse(response: unknown): unknown[] {
   if (Array.isArray(response)) return response;
@@ -19,7 +20,26 @@ function normalizeProductListResponse(response: unknown): unknown[] {
 }
 
 export async function fetchProducts(params?: { per_page?: number; page?: number; search?: string }) {
-  const response = await wcAPI.getProducts(params);
+  let response: unknown;
+  try {
+    response = await wcAPI.getProducts(params);
+  } catch (e) {
+    console.warn("[WooCommerce] Store API unavailable, using REST v3 /products:", e);
+    const v3List = await fetchProductsViaWooRestV3({
+      per_page: params?.per_page ?? 20,
+      page: params?.page ?? 1,
+      search: params?.search,
+    });
+    return v3List.flatMap((p) => {
+      try {
+        return [mapWCProductToFrontend(p)];
+      } catch (err) {
+        console.error("[WooCommerce] map product skipped:", err);
+        return [];
+      }
+    });
+  }
+
   const products = normalizeProductListResponse(response);
   return products.flatMap((p) => {
     try {
@@ -36,7 +56,9 @@ export async function fetchProductBySlug(slug: string): Promise<FrontendProduct 
     const product = (await wcAPI.getProduct(slug)) as WCStoreProduct;
     return mapWCProductToFrontend(product);
   } catch (error) {
-    console.error(`Failed to fetch product ${slug}:`, error);
+    console.warn(`[WooCommerce] Store API product ${slug} failed, trying REST v3:`, error);
+    const v3 = await fetchProductBySlugViaWooRestV3(slug);
+    if (v3) return mapWCProductToFrontend(v3);
     return null;
   }
 }
