@@ -9,9 +9,17 @@ function normalizeBaseUrl(url: string) {
   return url.replace(/\/+$/, "");
 }
 
+function wooRestOrdersUrl(base: string, consumerKey: string, consumerSecret: string) {
+  const url = new URL(`${normalizeBaseUrl(base)}/wp-json/wc/v3/orders`);
+  url.searchParams.set("consumer_key", consumerKey);
+  url.searchParams.set("consumer_secret", consumerSecret);
+  return url.toString();
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const baseUrl = process.env.WOOCOMMERCE_URL;
+    const baseUrl =
+      process.env.WOOCOMMERCE_URL || process.env.NEXT_PUBLIC_WOOCOMMERCE_URL;
     const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY;
     const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET;
 
@@ -66,25 +74,38 @@ export async function POST(req: NextRequest) {
     };
 
     const apiBase = normalizeBaseUrl(baseUrl);
-    const endpoint = `${apiBase}/wp-json/wc/v3/orders`;
-    const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
+    // Query-string auth: many PHP / reverse-proxy setups strip Authorization: Basic.
+    const endpoint = wooRestOrdersUrl(apiBase, consumerKey, consumerSecret);
 
     const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Basic ${auth}`,
       },
       body: JSON.stringify(payload),
+      cache: "no-store",
     });
 
-    const bodyText = await res.text();
-    let order: { id?: number; order_key?: string; total?: string; message?: string } = {};
+    const rawText = await res.text();
+    const bodyText = rawText.replace(/^\uFEFF/, "").trim();
+
+    let order: { id?: number; order_key?: string; total?: string; message?: string; code?: string } =
+      {};
     try {
       order = JSON.parse(bodyText) as typeof order;
     } catch {
+      const preview = bodyText.slice(0, 280).replace(/\s+/g, " ");
+      console.error(
+        "[WooCommerce] Non-JSON response",
+        res.status,
+        preview || "(empty body)"
+      );
+      const looksHtml = /<!DOCTYPE|<html[\s>]/i.test(bodyText);
+      const hint = looksHtml
+        ? "Received HTML instead of JSON — check WOOCOMMERCE_URL (include /shop if WordPress is in a subdirectory), permalinks, and that the REST API is not blocked."
+        : "WooCommerce did not return JSON — check store URL, SSL, and API credentials (Read/Write).";
       return NextResponse.json(
-        { error: "Invalid response from WooCommerce" },
+        { error: `${hint} (HTTP ${res.status})` },
         { status: 502 }
       );
     }
