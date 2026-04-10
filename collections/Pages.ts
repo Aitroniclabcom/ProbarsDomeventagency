@@ -6,6 +6,7 @@ import { GalleryBlock } from '../blocks/Gallery'
 import { CTABlock } from '../blocks/Cta'
 import { PartnersBlock } from '../blocks/Partners'
 import { EventBuilderBlock } from '../blocks/EventBuilder'
+import { ServiceSectionBlock } from '../blocks/ServiceSection'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -33,6 +34,7 @@ export const Pages: CollectionConfig = {
         CTABlock,
         PartnersBlock,
         EventBuilderBlock,
+        ServiceSectionBlock,
       ],
     },
     {

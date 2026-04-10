@@ -4,11 +4,12 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { EventBuilder } from "@/components/EventBuilder";
 import { CartDrawer } from "@/components/CartDrawer";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Plus, Disc, Wine, ChevronDown, PenTool, Lightbulb, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import { Plus, ChevronDown } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePayloadPage } from "@/components/PayloadDataProvider";
-import Image from "next/image";
+import { ServiceSections } from "@/components/ServiceSections";
+import { resolveServiceSections } from "@/lib/resolveServiceSections";
 
 export default function HomePage() {
   const payloadData = usePayloadPage();
@@ -95,12 +96,6 @@ export default function HomePage() {
       ];
 
   const [activeAboutIndex, setActiveAboutIndex] = useState<number | null>(null);
-  const [expandedServiceIndex, setExpandedServiceIndex] = useState<number | null>(null);
-  const [isCateringDetailsOpen, setIsCateringDetailsOpen] = useState(false);
-  const [isMusicDetailsOpen, setIsMusicDetailsOpen] = useState(false);
-  const [isDesignDetailsOpen, setIsDesignDetailsOpen] = useState(false);
-  const [isDecorDetailsOpen, setIsDecorDetailsOpen] = useState(false);
-  const [isConsultingDetailsOpen, setIsConsultingDetailsOpen] = useState(false);
   const [activeTeamMember, setActiveTeamMember] = useState<number | null>(null);
   const { t } = useLanguage();
   // Payload data available: payloadData?.layout
@@ -117,6 +112,8 @@ export default function HomePage() {
   const scrollToBuilder = () => {
     document.getElementById("builder")?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const serviceSections = resolveServiceSections(payloadData?.layout as unknown[] | undefined, t);
 
   return (
     <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans selection:bg-[#8C080C] selection:text-white">
@@ -221,150 +218,9 @@ export default function HomePage() {
         <EventBuilder />
       </div>
 
-      {/* CATERING */}
-      <section id="services" className="grid md:grid-cols-2 min-h-[600px] border-b border-white/5">
-        <div className="bg-[#151515] p-12 md:p-24 flex flex-col justify-center">
-          <Wine className="w-12 h-12 text-[#C0A07B] mb-8" />
-          <h2 className="text-4xl font-serif mb-6">{t("services.catering.title")}</h2>
-          <p className="text-gray-400 font-light mb-8 leading-relaxed">{t("services.catering.desc")}</p>
-          <ul className="space-y-4 mb-10 text-sm font-light text-gray-300">
-            <li className="flex items-center gap-3"><span className="w-1 h-1 bg-[#C0A07B]"></span>{t("services.catering.list1")}</li>
-            <li className="flex items-center gap-3"><span className="w-1 h-1 bg-[#C0A07B]"></span>{t("services.catering.list2")}</li>
-            <li className="flex items-center gap-3"><span className="w-1 h-1 bg-[#C0A07B]"></span>{t("services.catering.list3")}</li>
-          </ul>
-          <AnimatePresence>
-            {isCateringDetailsOpen && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.5 }} className="overflow-hidden mb-8">
-                <div className="pt-4 pb-8 space-y-8 border-t border-white/10">
-                  <div>
-                    <h3 className="text-[#C0A07B] font-serif mb-4">{t("services.catering.howTitle")}</h3>
-                    <ul className="space-y-3 text-sm text-gray-400 font-light">
-                      <li>{t("services.catering.how1")}</li>
-                      <li>{t("services.catering.how2")}</li>
-                      <li>{t("services.catering.how3")}</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="text-[#C0A07B] font-serif mb-4">{t("services.catering.advTitle")}</h3>
-                    <ul className="space-y-3 text-sm text-gray-400 font-light list-disc pl-4">
-                      <li>{t("services.catering.adv1")}</li>
-                      <li>{t("services.catering.adv2")}</li>
-                      <li>{t("services.catering.adv3")}</li>
-                      <li>{t("services.catering.adv4")}</li>
-                    </ul>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div className="flex gap-4 items-center">
-            <button onClick={() => setIsCateringDetailsOpen(!isCateringDetailsOpen)} className="text-xs tracking-[0.2em] border border-white/30 px-6 py-3 hover:text-[#C0A07B] hover:border-[#C0A07B] transition-colors uppercase">
-              {isCateringDetailsOpen ? t("services.catering.close") : t("services.catering.more")}
-            </button>
-            <button onClick={scrollToBuilder} className="bg-[#8C080C] text-white px-8 py-3 text-xs tracking-widest hover:bg-[#a0090e] transition-colors font-medium border border-[#8C080C]">
-              {t("services.catering.add")}
-            </button>
-          </div>
-        </div>
-        <div className="relative h-[400px] md:h-auto">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(/assets/gallery/buffet.jpg)` }}>
-            <div className="absolute inset-0 bg-black/20 hover:bg-transparent transition-colors duration-700"></div>
-          </div>
-        </div>
-      </section>
-
-      {/* MUSIC */}
-      <section className="grid md:grid-cols-2 min-h-[600px] border-b border-white/5">
-        <div className="relative h-[400px] md:h-auto order-2 md:order-1">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(/assets/gallery/dj-turntable.jpg)` }}>
-            <div className="absolute inset-0 bg-black/20 hover:bg-transparent transition-colors duration-700"></div>
-          </div>
-        </div>
-        <div className="bg-[#1a1a1a] p-12 md:p-24 flex flex-col justify-center order-1 md:order-2">
-          <Disc className="w-12 h-12 text-[#C0A07B] mb-8" />
-          <h2 className="text-4xl font-serif mb-6">{t("services.music.title")}</h2>
-          <p className="text-gray-400 font-light mb-8 leading-relaxed">{t("services.music.desc")}</p>
-          <ul className="space-y-4 mb-10 text-sm font-light text-gray-300">
-            <li className="flex items-start gap-3"><span className="w-1 h-1 bg-[#C0A07B] mt-2 shrink-0"></span><span>{t("services.music.list1")}</span></li>
-            <li className="flex items-start gap-3"><span className="w-1 h-1 bg-[#C0A07B] mt-2 shrink-0"></span><span>{t("services.music.list2")}</span></li>
-            <li className="flex items-start gap-3"><span className="w-1 h-1 bg-[#C0A07B] mt-2 shrink-0"></span><span>{t("services.music.list3")}</span></li>
-          </ul>
-          <div className="flex gap-4 items-center">
-            <button onClick={() => setIsMusicDetailsOpen(!isMusicDetailsOpen)} className="text-xs tracking-[0.2em] border border-white/30 px-6 py-3 hover:text-[#C0A07B] hover:border-[#C0A07B] transition-colors uppercase">
-              {isMusicDetailsOpen ? t("services.music.close") : t("services.music.more")}
-            </button>
-            <button onClick={scrollToBuilder} className="bg-[#8C080C] text-white px-8 py-3 text-xs tracking-widest hover:bg-[#a0090e] transition-colors font-medium border border-[#8C080C]">
-              {t("services.music.add")}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* DESIGN */}
-      <section className="grid md:grid-cols-2 min-h-[600px] border-b border-white/5">
-        <div className="bg-[#151515] p-12 md:p-24 flex flex-col justify-center">
-          <PenTool className="w-12 h-12 text-[#C0A07B] mb-8" />
-          <h2 className="text-4xl font-serif mb-6">{t("services.design.title")}</h2>
-          <p className="text-gray-400 font-light mb-8 leading-relaxed">{t("services.design.desc")}</p>
-          <div className="flex gap-4 items-center">
-            <button onClick={() => setIsDesignDetailsOpen(!isDesignDetailsOpen)} className="text-xs tracking-[0.2em] border border-white/30 px-6 py-3 hover:text-[#C0A07B] hover:border-[#C0A07B] transition-colors uppercase">
-              {isDesignDetailsOpen ? t("services.design.close") : t("services.design.more")}
-            </button>
-            <button onClick={scrollToBuilder} className="bg-[#8C080C] text-white px-8 py-3 text-xs tracking-widest hover:bg-[#a0090e] transition-colors font-medium border border-[#8C080C]">
-              {t("services.design.add")}
-            </button>
-          </div>
-        </div>
-        <div className="relative h-[400px] md:h-auto">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(/assets/design.png)` }}>
-            <div className="absolute inset-0 bg-black/20 hover:bg-transparent transition-colors duration-700"></div>
-          </div>
-        </div>
-      </section>
-
-      {/* DECOR */}
-      <section className="grid md:grid-cols-2 min-h-[600px] border-b border-white/5">
-        <div className="relative h-[400px] md:h-auto order-2 md:order-1">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(/assets/gallery/decor-red.jpg)` }}>
-            <div className="absolute inset-0 bg-black/20 hover:bg-transparent transition-colors duration-700"></div>
-          </div>
-        </div>
-        <div className="bg-[#1a1a1a] p-12 md:p-24 flex flex-col justify-center order-1 md:order-2">
-          <Lightbulb className="w-12 h-12 text-[#C0A07B] mb-8" />
-          <h2 className="text-4xl font-serif mb-6">{t("services.decor.title")}</h2>
-          <p className="text-gray-400 font-light mb-8 leading-relaxed">{t("services.decor.desc")}</p>
-          <div className="flex gap-4 items-center">
-            <button onClick={() => setIsDecorDetailsOpen(!isDecorDetailsOpen)} className="text-xs tracking-[0.2em] border border-white/30 px-6 py-3 hover:text-[#C0A07B] hover:border-[#C0A07B] transition-colors uppercase">
-              {isDecorDetailsOpen ? t("services.decor.close") : t("services.decor.more")}
-            </button>
-            <button onClick={scrollToBuilder} className="bg-[#8C080C] text-white px-8 py-3 text-xs tracking-widest hover:bg-[#a0090e] transition-colors font-medium border border-[#8C080C]">
-              {t("services.decor.add")}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* CONSULTING */}
-      <section className="grid md:grid-cols-2 min-h-[600px] border-b border-white/5">
-        <div className="bg-[#151515] p-12 md:p-24 flex flex-col justify-center">
-          <Users className="w-12 h-12 text-[#C0A07B] mb-8" />
-          <h2 className="text-4xl font-serif mb-6">{t("services.consulting.title")}</h2>
-          <p className="text-gray-400 font-light mb-8 leading-relaxed">{t("services.consulting.desc")}</p>
-          <div className="flex gap-4 items-center">
-            <button onClick={() => setIsConsultingDetailsOpen(!isConsultingDetailsOpen)} className="text-xs tracking-[0.2em] border border-white/30 px-6 py-3 hover:text-[#C0A07B] hover:border-[#C0A07B] transition-colors uppercase">
-              {isConsultingDetailsOpen ? t("services.consulting.close") : t("services.consulting.more")}
-            </button>
-            <button onClick={scrollToBuilder} className="bg-[#8C080C] text-white px-8 py-3 text-xs tracking-widest hover:bg-[#a0090e] transition-colors font-medium border border-[#8C080C]">
-              {t("services.consulting.add")}
-            </button>
-          </div>
-        </div>
-        <div className="relative h-[400px] md:h-auto">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(/assets/consulting-team.jpg)` }}>
-            <div className="absolute inset-0 bg-black/20 hover:bg-transparent transition-colors duration-700"></div>
-          </div>
-        </div>
-      </section>
+      <div id="services">
+        <ServiceSections sections={serviceSections} onAddToBuilder={scrollToBuilder} />
+      </div>
 
       {/* GALLERY */}
       <section className="py-24 bg-[#111]">

@@ -155,7 +155,10 @@ export const translations = {
         adv1: "Unikāls skanējums: Muzikālais paraksts, kas izceļ pasākumu starp citiem.",
         adv2: "Vizuālā un audio harmonija: Vinila atskaņotāji kā stila elements.",
         adv3: "Pieredzējuši rezidenti: Dīdžeji ar starptautisku pieredzi.",
-        adv4: "Pielāgojamība: Satura modulis, kas viegli integrējas jebkurā pasākuma plānā."
+        adv4: "Pielāgojamība: Satura modulis, kas viegli integrējas jebkurā pasākuma plānā.",
+        more: "UZZINĀT VAIRĀK",
+        close: "AIZVĒRT",
+        add: "PIEVIENOT"
       },
       design: {
         title: "DESIGN & WEB",
@@ -171,7 +174,10 @@ export const translations = {
         adv1: "Stilistiskā viengabalainība visos materiālos.",
         adv2: "Uz detaļām vērsts dizains: minimālisms un augstvērtīga estētika.",
         adv3: "Tehniskā izcilība un adaptivitāte.",
-        adv4: "Individuāls raksturs, kas netop pēc šablona."
+        adv4: "Individuāls raksturs, kas netop pēc šablona.",
+        more: "UZZINĀT VAIRĀK",
+        close: "AIZVĒRT",
+        add: "PIEVIENOT"
       },
       decor: {
         title: "SOUND & DECOR",
@@ -187,7 +193,10 @@ export const translations = {
         adv1: "Sajūtu sinerģija: Harmonija starp redzamo un dzirdamo.",
         adv2: "Dabiskums un stils: Dodam priekšroku dabiskām faktūrām un minimālismam.",
         adv3: "Individuāla skatuves māksla: Unikāla scenogrāfija.",
-        adv4: "Pielāgojamība jebkurai videi."
+        adv4: "Pielāgojamība jebkurai videi.",
+        more: "UZZINĀT VAIRĀK",
+        close: "AIZVĒRT",
+        add: "PIEVIENOT"
       },
       consulting: {
         title: "CONSULTING",
@@ -203,7 +212,10 @@ export const translations = {
         adv1: "Ekspertu zināšanas: Reāla pieredze starptautiskajā nozarē.",
         adv2: "Mērķtiecīga izaugsme un rezultāts.",
         adv3: "Mūsdienīgi rīki un HoReCa tendences.",
-        adv4: "Individuāls fokuss uz iestādes specifiku."
+        adv4: "Individuāls fokuss uz iestādes specifiku.",
+        more: "UZZINĀT VAIRĀK",
+        close: "AIZVĒRT",
+        add: "PIEVIENOT"
       }
     },
     gallery: {
@@ -396,7 +408,10 @@ export const translations = {
         adv1: "Уникальное звучание: Музыкальная подпись, выделяющая мероприятие среди других.",
         adv2: "Визуальная и аудио гармония: Виниловы�� проигрыватели как элемент стиля.",
         adv3: "Опытные резиденты: Диджеи с международным опытом.",
-        adv4: "Адаптивность: Модуль контента, который легко интегрируется в любой план мероприятия."
+        adv4: "Адаптивность: Модуль контента, который легко интегрируется в любой план мероприятия.",
+        more: "УЗНАТЬ БОЛЬШЕ",
+        close: "ЗАКРЫТЬ",
+        add: "ДОБАВИТЬ"
       },
       design: {
         title: "DESIGN & WEB",
@@ -412,7 +427,10 @@ export const translations = {
         adv1: "Стилистическая целостность во всех материалах.",
         adv2: "Дизайн, ориентированный на детали: минимализм и высокая эстетика.",
         adv3: "Техническое совершенство и адаптивность.",
-        adv4: "Индивидуальный характер, который не создается по шаблону."
+        adv4: "Индивидуальный характер, который не создается по шаблону.",
+        more: "УЗНАТЬ БОЛЬШЕ",
+        close: "ЗАКРЫТЬ",
+        add: "ДОБАВИТЬ"
       },
       decor: {
         title: "SOUND & DECOR",
@@ -428,7 +446,10 @@ export const translations = {
         adv1: "Синергия чувств: Гармония между видимым и слышимым.",
         adv2: "Естественность и стиль: Отдаем предпочтение натуральным фактурам и минимализму.",
         adv3: "Индивидуальная сценография: Уникальная сценография.",
-        adv4: "Адаптируемость к любой среде."
+        adv4: "Адаптируемость к любой среде.",
+        more: "УЗНАТЬ БОЛЬШЕ",
+        close: "ЗАКРЫТЬ",
+        add: "ДОБАВИТЬ"
       },
       consulting: {
         title: "CONSULTING",
@@ -444,7 +465,10 @@ export const translations = {
         adv1: "Экспертные знания: Реальный опыт в международной отрасли.",
         adv2: "Целенаправленный рост и результат.",
         adv3: "Современные инструменты и тенденции HoReCa.",
-        adv4: "Индивидуальный фокус на специфику заведения."
+        adv4: "Индивидуальный фокус на специфику заведения.",
+        more: "УЗНАТЬ БОЛЬШЕ",
+        close: "ЗАКРЫТЬ",
+        add: "ДОБАВИТЬ"
       }
     },
     gallery: {
@@ -637,7 +661,10 @@ export const translations = {
         adv1: "Unique sound: A musical signature that distinguishes the event from others.",
         adv2: "Visual and audio harmony: Turntables as a style element.",
         adv3: "Experienced residents: DJs with international experience.",
-        adv4: "Adaptability: A content module that easily integrates into any event plan."
+        adv4: "Adaptability: A content module that easily integrates into any event plan.",
+        more: "LEARN MORE",
+        close: "CLOSE",
+        add: "ADD"
       },
       design: {
         title: "DESIGN & WEB",
@@ -653,7 +680,10 @@ export const translations = {
         adv1: "Stylistic integrity across all materials.",
         adv2: "Detail-oriented design: minimalism and high-end aesthetics.",
         adv3: "Technical excellence and adaptability.",
-        adv4: "Individual character not created by a template."
+        adv4: "Individual character not created by a template.",
+        more: "LEARN MORE",
+        close: "CLOSE",
+        add: "ADD"
       },
       decor: {
         title: "SOUND & DECOR",
@@ -669,7 +699,10 @@ export const translations = {
         adv1: "Sensory synergy: Harmony between the visible and audible.",
         adv2: "Naturalness and style: We prefer natural textures and minimalism.",
         adv3: "Individual scenography: Unique scenography.",
-        adv4: "Adaptability to any environment."
+        adv4: "Adaptability to any environment.",
+        more: "LEARN MORE",
+        close: "CLOSE",
+        add: "ADD"
       },
       consulting: {
         title: "CONSULTING",
@@ -685,7 +718,10 @@ export const translations = {
         adv1: "Expert knowledge: Real experience in the international industry.",
         adv2: "Targeted growth and result.",
         adv3: "Modern tools and HoReCa trends.",
-        adv4: "Individual focus on the establishment's specifics."
+        adv4: "Individual focus on the establishment's specifics.",
+        more: "LEARN MORE",
+        close: "CLOSE",
+        add: "ADD"
       }
     },
     gallery: {

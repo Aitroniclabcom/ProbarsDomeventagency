@@ -18,6 +18,7 @@ export async function getPageBySlug(slug: string, locale = 'lv') {
       where: { slug: { equals: slug } },
       locale: locale as 'lv' | 'ru' | 'en',
       limit: 1,
+      depth: 2,
     })
     return result.docs[0] ?? null
   } catch {

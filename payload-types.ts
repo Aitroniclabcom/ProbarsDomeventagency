@@ -261,6 +261,48 @@ export interface Page {
             blockName?: string | null;
             blockType: 'eventBuilder';
           }
+        | {
+            /**
+             * Piemēram: Catering, DJ — lai vieglāk sakārtot bloku sarakstu.
+             */
+            adminLabel?: string | null;
+            imagePosition?: ('right' | 'left') | null;
+            panelStyle?: ('dark' | 'charcoal') | null;
+            icon: 'wine' | 'disc' | 'penTool' | 'lightbulb' | 'users';
+            title: string;
+            description?: string | null;
+            bullets?:
+              | {
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Ja nav augšupielādēts attēls, izmantot publisko ceļu (piem. /assets/gallery/buffet.jpg).
+             */
+            fallbackImage?: string | null;
+            image?: (number | null) | Media;
+            howTitle?: string | null;
+            howItems?:
+              | {
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            advTitle?: string | null;
+            advItems?:
+              | {
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            moreLabel?: string | null;
+            closeLabel?: string | null;
+            addLabel?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'serviceSection';
+          }
       )[]
     | null;
   seo?: {
@@ -531,6 +573,43 @@ export interface PagesSelect<T extends boolean = true> {
                     image?: T;
                     id?: T;
                   };
+              id?: T;
+              blockName?: T;
+            };
+        serviceSection?:
+          | T
+          | {
+              adminLabel?: T;
+              imagePosition?: T;
+              panelStyle?: T;
+              icon?: T;
+              title?: T;
+              description?: T;
+              bullets?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              fallbackImage?: T;
+              image?: T;
+              howTitle?: T;
+              howItems?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              advTitle?: T;
+              advItems?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              moreLabel?: T;
+              closeLabel?: T;
+              addLabel?: T;
               id?: T;
               blockName?: T;
             };

@@ -1,6 +1,49 @@
 import { getPayload } from 'payload'
 import payloadConfig from '../payload.config'
-import { translations } from '../i18n/translations'
+import { translations, type Language } from '../i18n/translations'
+
+type ServiceKey = 'catering' | 'music' | 'design' | 'decor' | 'consulting'
+
+function buildServiceSectionBlocks(lang: Language) {
+  const svc = translations[lang].services
+  const mk = (
+    key: ServiceKey,
+    imagePosition: 'left' | 'right',
+    panelStyle: 'dark' | 'charcoal',
+    icon: string,
+    fallbackImage: string,
+  ) => {
+    const x = svc[key] as Record<string, string>
+    const bullets = ['list1', 'list2', 'list3', 'list4', 'list5']
+      .map((k) => (x[k] ? { text: x[k] } : null))
+      .filter(Boolean) as { text: string }[]
+    return {
+      blockType: 'serviceSection' as const,
+      adminLabel: key,
+      imagePosition,
+      panelStyle,
+      icon,
+      fallbackImage,
+      title: x.title,
+      description: x.desc,
+      bullets,
+      howTitle: x.howTitle,
+      howItems: [x.how1, x.how2, x.how3].map((text) => ({ text })),
+      advTitle: x.advTitle,
+      advItems: [x.adv1, x.adv2, x.adv3, x.adv4].map((text) => ({ text })),
+      moreLabel: x.more,
+      closeLabel: x.close,
+      addLabel: x.add,
+    }
+  }
+  return [
+    mk('catering', 'right', 'charcoal', 'wine', '/assets/gallery/buffet.jpg'),
+    mk('music', 'left', 'dark', 'disc', '/assets/gallery/dj-turntable.jpg'),
+    mk('design', 'right', 'charcoal', 'penTool', '/assets/design.png'),
+    mk('decor', 'left', 'dark', 'lightbulb', '/assets/gallery/decor-red.jpg'),
+    mk('consulting', 'right', 'charcoal', 'users', '/assets/consulting-team.jpg'),
+  ]
+}
 
 function getLayoutForLocale(lang: 'ru' | 'en') {
   const t = translations[lang]
@@ -83,6 +126,7 @@ function getLayoutForLocale(lang: 'ru' | 'en') {
         { key: 'logistics', title: (t as any).builder?.services?.logistics?.title ?? 'Logistics', description: (t as any).builder?.services?.logistics?.desc ?? '', price: 0 },
       ],
     },
+    ...buildServiceSectionBlocks(lang),
   ]
 }
 
@@ -225,6 +269,7 @@ async function seed() {
           },
         ],
       },
+      ...buildServiceSectionBlocks('lv'),
     ],
   }
 
