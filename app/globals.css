@@ -33,9 +33,15 @@
   * {
     @apply border-border;
   }
+  html {
+    overflow-x: clip;
+    max-width: 100%;
+  }
   body {
     @apply font-sans font-light antialiased bg-background text-foreground;
     background-color: #222222;
+    overflow-x: clip;
+    max-width: 100%;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif font-normal;

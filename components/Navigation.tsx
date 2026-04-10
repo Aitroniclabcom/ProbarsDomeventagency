@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Globe, ShoppingBag } from "lucide-react";
@@ -12,6 +13,7 @@ import Image from "next/image";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { itemCount, setIsCartOpen } = useCart();
@@ -33,10 +35,23 @@ export function Navigation() {
   const isHome = pathname === "/";
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
 
   const toggleLanguage = (lang: "lv" | "ru" | "en") => {
     setLanguage(lang);
@@ -46,10 +61,84 @@ export function Navigation() {
   const isExternalHref = (href: string) =>
     /^https?:\/\//i.test(href) || href.startsWith("mailto:") || href.startsWith("tel:");
 
+  const mobileMenu =
+    mounted &&
+    createPortal(
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="mobile-nav-overlay"
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-[#111] text-2xl font-serif lg:hidden"
+            style={{ width: "100%", maxWidth: "100dvw", left: 0, right: 0 }}
+          >
+            <button type="button" className="absolute top-6 right-6 text-white" onClick={() => setIsOpen(false)} aria-label="Close menu">
+              <X size={32} />
+            </button>
+            {navLinks?.length ? (
+              navLinks.map((link: { label?: string; href?: string }, i: number) => {
+                const href = link.href ?? "#";
+                const label = link.label ?? "";
+                if (isExternalHref(href)) {
+                  return (
+                    <a
+                      key={i}
+                      href={href}
+                      onClick={() => setIsOpen(false)}
+                      className="hover:text-[#C0A07B] transition-colors"
+                      target={href.startsWith("http") ? "_blank" : undefined}
+                      rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    >
+                      {label}
+                    </a>
+                  );
+                }
+                return (
+                  <Link key={i} href={href} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">
+                    {label}
+                  </Link>
+                );
+              })
+            ) : (
+              <>
+                <a href={isHome ? "#about" : "/#about"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">
+                  {t("nav.about")}
+                </a>
+                <a href={isHome ? "#team" : "/#team"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">
+                  {t("nav.team")}
+                </a>
+                <a href={isHome ? "#services" : "/#services"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">
+                  {t("nav.services")}
+                </a>
+                <Link href="/shop" onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">
+                  {t("nav.shop")}
+                </Link>
+                {showBlog && (
+                  <Link href="/blog" onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">
+                    {t("nav.blog")}
+                  </Link>
+                )}
+                <a href={isHome ? "#contacts" : "/#contacts"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">
+                  {t("nav.contacts")}
+                </a>
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>,
+      document.body,
+    );
+
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-[#222222]/90 backdrop-blur-md py-4" : "bg-transparent py-6"}`}>
-      <div className="container mx-auto px-6 flex justify-between items-center">
-        <Link href="/" className="z-50">
+    <>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 w-full max-w-[100dvw] transition-all duration-300 ${scrolled ? "py-4" : "bg-transparent py-6"}`}
+      >
+        {scrolled ? <div className="pointer-events-none absolute inset-0 -z-10 bg-[#222222]/90 backdrop-blur-md" aria-hidden /> : null}
+        <div className="container relative mx-auto flex min-w-0 max-w-full items-center justify-between px-6">
+        <Link href="/" className="z-50 shrink-0 min-w-0">
           <Image src="/assets/logo-full.png" alt="D.O.M. Event Agency" width={140} height={48} className="h-12 w-auto" />
         </Link>
 
@@ -122,7 +211,7 @@ export function Navigation() {
         </div>
 
         {/* Mobile Toggle */}
-        <div className="lg:hidden flex items-center gap-4 z-50">
+        <div className="z-50 flex shrink-0 items-center gap-4 lg:hidden">
           <button onClick={() => setIsCartOpen(true)} className="relative text-white hover:text-[#C0A07B]">
             <ShoppingBag size={20} />
             {itemCount > 0 && (
@@ -135,61 +224,13 @@ export function Navigation() {
           }} className="text-white text-sm uppercase font-light tracking-widest hover:text-[#C0A07B]">
             {language}
           </button>
-          <button className="text-white" onClick={() => setIsOpen(!isOpen)}>
+          <button type="button" className="text-white" onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen} aria-label={isOpen ? "Close menu" : "Open menu"}>
             {isOpen ? <X /> : <Menu />}
           </button>
         </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, x: "100%" }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: "100%" }}
-              className="fixed inset-0 bg-[#111] flex flex-col items-center justify-center gap-8 text-2xl font-serif"
-            >
-              <button className="absolute top-6 right-6 text-white" onClick={() => setIsOpen(false)}><X size={32} /></button>
-              {navLinks?.length ? (
-                navLinks.map((link: { label?: string; href?: string }, i: number) => {
-                  const href = link.href ?? "#";
-                  const label = link.label ?? "";
-                  if (isExternalHref(href)) {
-                    return (
-                      <a
-                        key={i}
-                        href={href}
-                        onClick={() => setIsOpen(false)}
-                        className="hover:text-[#C0A07B] transition-colors"
-                        target={href.startsWith("http") ? "_blank" : undefined}
-                        rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      >
-                        {label}
-                      </a>
-                    );
-                  }
-                  return (
-                    <Link key={i} href={href} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">
-                      {label}
-                    </Link>
-                  );
-                })
-              ) : (
-                <>
-                  <a href={isHome ? "#about" : "/#about"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.about")}</a>
-                  <a href={isHome ? "#team" : "/#team"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.team")}</a>
-                  <a href={isHome ? "#services" : "/#services"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.services")}</a>
-                  <Link href="/shop" onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.shop")}</Link>
-                  {showBlog && (
-                    <Link href="/blog" onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.blog")}</Link>
-                  )}
-                  <a href={isHome ? "#contacts" : "/#contacts"} onClick={() => setIsOpen(false)} className="hover:text-[#C0A07B] transition-colors">{t("nav.contacts")}</a>
-                </>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </nav>
+      {mobileMenu}
+    </>
   );
 }

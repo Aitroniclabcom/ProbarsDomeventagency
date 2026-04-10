@@ -103,7 +103,7 @@ export default function CheckoutPage() {
   // ── Success state ──────────────────────────────────────────────────────────
   if (orderId) {
     return (
-      <div className="bg-[#222222] min-h-screen text-white font-sans">
+      <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
         <Navigation />
         <div className="container mx-auto px-6 pt-40 pb-24 flex flex-col items-center text-center max-w-lg">
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
@@ -131,7 +131,7 @@ export default function CheckoutPage() {
   // ── Empty cart redirect ────────────────────────────────────────────────────
   if (!items.length) {
     return (
-      <div className="bg-[#222222] min-h-screen text-white font-sans">
+      <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
         <Navigation />
         <div className="container mx-auto px-6 pt-40 pb-24 flex flex-col items-center text-center max-w-lg">
           <ShoppingBag className="w-16 h-16 text-gray-600 mb-6" />
@@ -149,7 +149,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="bg-[#222222] min-h-screen text-white font-sans">
+    <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
       <Navigation />
 
       <div className="pt-32 pb-12 bg-[#1a1a1a]">

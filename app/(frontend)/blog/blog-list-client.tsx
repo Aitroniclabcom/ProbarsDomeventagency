@@ -21,7 +21,7 @@ export function BlogListClient({ posts }: { posts: BlogListPost[] }) {
   const { language, t } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-[#111111]">
+    <div className="min-h-screen max-w-full overflow-x-hidden bg-[#111111]">
       <Navigation />
       <CartDrawer />
 

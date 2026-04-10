@@ -119,21 +119,23 @@ export default function HomePage() {
   };
 
   return (
-    <div className="bg-[#222222] min-h-screen text-white font-sans selection:bg-[#8C080C] selection:text-white">
+    <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans selection:bg-[#8C080C] selection:text-white">
       <Navigation />
       <CartDrawer />
 
       {/* HERO */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <motion.div
-          className="absolute inset-0 bg-cover bg-center z-0"
-          style={{ backgroundImage: `url(/assets/hero-bg-new.jpg)` }}
-          initial={{ scale: 1 }}
-          animate={{ scale: 1.1 }}
-          transition={{ duration: 20, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-        >
-          <div className="absolute inset-0 bg-black/60" />
-        </motion.div>
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <motion.div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(/assets/hero-bg-new.jpg)` }}
+            initial={{ scale: 1 }}
+            animate={{ scale: 1.1 }}
+            transition={{ duration: 20, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+          >
+            <div className="absolute inset-0 bg-black/60" />
+          </motion.div>
+        </div>
 
         <div className="container mx-auto px-6 relative z-10 text-center">
           <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: "easeOut" }} className="text-5xl md:text-8xl font-serif tracking-tight mb-6 leading-tight">

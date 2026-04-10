@@ -61,7 +61,7 @@ export default function ShopPage() {
   }
 
   return (
-    <div className="bg-[#222222] min-h-screen text-white font-sans selection:bg-[#8C080C] selection:text-white">
+    <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans selection:bg-[#8C080C] selection:text-white">
       <Navigation />
       <CartDrawer />
 
