@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/kklau/Documents/GitHub/Probars/app/layout.tsx"],"sourcesContent":["import type { Metadata } from 'next'\r\n\r\nexport const metadata: Metadata = {\r\n  title: 'D.O.M. Event Agency',\r\n  description: 'Premium event management agency. We are not for everyone, we are for you.',\r\n}\r\n\r\nexport default function RootLayout({\r\n  children,\r\n}: {\r\n  children: React.ReactNode\r\n}) {\r\n  return (\r\n    <html>\r\n      <body>{children}</body>\r\n    </html>\r\n  )\r\n}\r\n"],"names":["metadata","title","description","RootLayout","children"],"mappings":";;;;;;;;AAEO,MAAMA,WAAqB;IAChCC,OAAO;IACPC,aAAa;AACf;AAEe,SAASC,WAAW,EACjCC,QAAQ,EAGT;IACC,qBACE,sQAAC;kBACC,cAAA,sQAAC;sBAAMA;;;AAGb"}}]
-}

@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 12, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/kklau/Documents/GitHub/Probars/app/%28payload%29/admin/%5B%5B...segments%5D%5D/page.tsx"],"sourcesContent":["import type { Metadata } from 'next'\r\nimport { RootPage, generatePageMetadata } from '@payloadcms/next/views'\r\nimport config from '@payload-config'\r\nimport { importMap } from '../importMap.js'\r\n\r\ntype Args = {\r\n  params: Promise<{ segments: string[] }>\r\n  searchParams: Promise<{ [key: string]: string | string[] }>\r\n}\r\n\r\nexport default function Page({ params, searchParams }: Args) {\r\n  return RootPage({ config, importMap, params, searchParams })\r\n}\r\n\r\nexport async function generateMetadata({ params, searchParams }: Args): Promise<Metadata> {\r\n  return generatePageMetadata({ config, params, searchParams })\r\n}\r\n"],"names":["Page","params","searchParams","config","importMap","generateMetadata"],"mappings":";;;;;;AACA;AAAA;AACA;AACA;;;;;;;;;;;AAOe,SAASA,KAAK,EAAEC,MAAM,EAAEC,YAAY,EAAQ;IACzD,OAAO,IAAA,oNAAQ,EAAC;QAAEC,QAAAA,8JAAM;QAAEC,WAAAA,uLAAS;QAAEH;QAAQC;IAAa;AAC5D;AAEO,eAAeG,iBAAiB,EAAEJ,MAAM,EAAEC,YAAY,EAAQ;IACnE,OAAO,IAAA,mOAAoB,EAAC;QAAEC,QAAAA,8JAAM;QAAEF;QAAQC;IAAa;AAC7D"}}]
-}

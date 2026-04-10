@@ -1,3 +1,0 @@
-module.exports=[12413,a=>{"use strict";var b=a.i(46891);a.s(["default",0,function({children:a}){return(0,b.jsx)("html",{children:(0,b.jsx)("body",{children:a})})},"metadata",0,{title:"D.O.M. Event Agency",description:"Premium event management agency. We are not for everyone, we are for you."}])},80294,a=>{a.n(a.i(12413))}];
-
-//# sourceMappingURL=Documents_GitHub_Probars_app_layout_tsx_05j3he8._.js.map
