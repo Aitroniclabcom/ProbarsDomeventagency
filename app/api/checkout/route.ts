@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getWooCommerceBaseUrl } from "@/lib/woocommerce/config";
 
 const WC_PAYMENT: Record<string, string> = {
   bacs: "Direct bank transfer",
   stripe: "Credit / Debit Card",
 };
 
-function normalizeBaseUrl(url: string) {
-  return url.replace(/\/+$/, "");
-}
-
-function wooRestOrdersUrl(base: string, consumerKey: string, consumerSecret: string) {
-  const url = new URL(`${normalizeBaseUrl(base)}/wp-json/wc/v3/orders`);
+function wooRestOrdersUrl(consumerKey: string, consumerSecret: string) {
+  const url = new URL(`${getWooCommerceBaseUrl()}/wp-json/wc/v3/orders`);
   url.searchParams.set("consumer_key", consumerKey);
   url.searchParams.set("consumer_secret", consumerSecret);
   return url.toString();
@@ -18,14 +15,22 @@ function wooRestOrdersUrl(base: string, consumerKey: string, consumerSecret: str
 
 export async function POST(req: NextRequest) {
   try {
-    const baseUrl =
-      process.env.WOOCOMMERCE_URL || process.env.NEXT_PUBLIC_WOOCOMMERCE_URL;
     const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY;
     const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET;
 
-    if (!baseUrl || !consumerKey || !consumerSecret) {
+    if (!consumerKey || !consumerSecret) {
       return NextResponse.json(
         { error: "WooCommerce REST credentials are not configured" },
+        { status: 500 }
+      );
+    }
+
+    let apiBase: string;
+    try {
+      apiBase = getWooCommerceBaseUrl();
+    } catch {
+      return NextResponse.json(
+        { error: "WOOCOMMERCE_URL / NEXT_PUBLIC_WOOCOMMERCE_URL is not set" },
         { status: 500 }
       );
     }
@@ -73,9 +78,8 @@ export async function POST(req: NextRequest) {
       line_items,
     };
 
-    const apiBase = normalizeBaseUrl(baseUrl);
     // Query-string auth: many PHP / reverse-proxy setups strip Authorization: Basic.
-    const endpoint = wooRestOrdersUrl(apiBase, consumerKey, consumerSecret);
+    const endpoint = wooRestOrdersUrl(consumerKey, consumerSecret);
 
     const res = await fetch(endpoint, {
       method: "POST",

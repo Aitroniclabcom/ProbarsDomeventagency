@@ -1,14 +1,11 @@
-const WC_URL = (process.env.NEXT_PUBLIC_WOOCOMMERCE_URL || process.env.WOOCOMMERCE_URL)?.replace(/\/$/, "");
-
-if (!WC_URL) {
-  throw new Error("NEXT_PUBLIC_WOOCOMMERCE_URL or WOOCOMMERCE_URL environment variable is not set");
-}
+import { getWooCommerceBaseUrl } from "./config";
 
 export class WooCommerceStoreAPI {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = `${WC_URL}/wp-json/wc/store/v1`;
+    const root = getWooCommerceBaseUrl();
+    this.baseUrl = `${root}/wp-json/wc/store/v1`;
   }
 
   private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -21,8 +18,9 @@ export class WooCommerceStoreAPI {
     const response = await fetch(url, {
       ...options,
       headers,
-      credentials: "include", // Include cookies for cart/session
-      next: { revalidate: 60 },
+      // Server-side calls to another host: no cookies; avoid Next data cache stale/empty Woo responses
+      credentials: "omit",
+      cache: "no-store",
     });
 
     if (!response.ok) {

@@ -9,10 +9,20 @@ import {
 } from "./mappers";
 import type { Language } from "@/i18n/translations";
 
+function normalizeProductListResponse(response: unknown): unknown[] {
+  if (Array.isArray(response)) return response;
+  if (response && typeof response === "object") {
+    const o = response as Record<string, unknown>;
+    if (Array.isArray(o.products)) return o.products;
+    if (Array.isArray(o.data)) return o.data;
+  }
+  return [];
+}
+
 export async function fetchProducts(locale: Language = "en", params?: { per_page?: number; page?: number; search?: string }) {
-  const response = (await wcAPI.getProducts(params)) as unknown[] | { products?: unknown[] };
-  const products = Array.isArray(response) ? response : response.products || [];
-  return products.map((p: any) => mapWCProductToFrontend(p, locale));
+  const response = await wcAPI.getProducts(params);
+  const products = normalizeProductListResponse(response);
+  return products.map((p) => mapWCProductToFrontend(p as WCStoreProduct, locale));
 }
 
 export async function fetchProductBySlug(slug: string, locale: Language = "en"): Promise<FrontendProduct | null> {
