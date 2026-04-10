@@ -40,6 +40,27 @@ export const translations = {
         checkout: "NOFORMĒT PIRKUMU"
       }
     },
+    tscheckout: {
+      title: "Checkout",
+      billing: "Norēķinu informācija",
+      firstName: "Vārds",
+      lastName: "Uzvārds",
+      email: "E-pasts",
+      phone: "Tālrunis",
+      address: "Adrese",
+      city: "Pilsēta",
+      country: "Valsts",
+      placeOrder: "APSTIPRINĀT PASŪTĪJUMU",
+      processing: "Apstrādā...",
+      summary: "Pasūtījuma kopsavilkums",
+      note: "Pēc pasūtījuma apstiprināšanas nosūtīsim maksājuma apstiprinājumu uz jūsu e-pastu ar bankas pārskaitījuma datiem.",
+      success: {
+        title: "Pasūtījums pieņemts!",
+        body: "Paldies par jūsu pasūtījumu. Mēs ar jums sazināsimies tuvākajā laikā.",
+        order: "Pasūtījums",
+        back: "Atpakaļ uz sākumu",
+      },
+    },
     hero: {
       title: "D.O.M. EVENT AGENCY",
       subtitle: "WE ARE NOT FOR EVERYONE, WE ARE FOR YOU",
@@ -250,6 +271,27 @@ export const translations = {
         checkout: "ОФОРМИТЬ ЗАКАЗ"
       }
     },
+    tscheckout: {
+      title: "Оформление заказа",
+      billing: "Платёжные данные",
+      firstName: "Имя",
+      lastName: "Фамилия",
+      email: "Эл. почта",
+      phone: "Телефон",
+      address: "Адрес",
+      city: "Город",
+      country: "Страна",
+      placeOrder: "ОФОРМИТЬ ЗАКАЗ",
+      processing: "Обработка...",
+      summary: "Сводка заказа",
+      note: "После подтверждения заказа мы отправим подтверждение оплаты на вашу электронную почту с реквизитами для банковского перевода.",
+      success: {
+        title: "Заказ принят!",
+        body: "Спасибо за ваш заказ. Мы свяжемся с вами в ближайшее время.",
+        order: "Заказ",
+        back: "Вернуться на главную",
+      },
+    },
     hero: {
       title: "D.O.M. EVENT AGENCY",
       subtitle: "МЫ НЕ ДЛЯ ВСЕХ, МЫ ДЛЯ ВАС",
@@ -459,6 +501,27 @@ export const translations = {
         total: "Total",
         checkout: "CHECKOUT"
       }
+    },
+    tscheckout: {
+      title: "Checkout",
+      billing: "Billing details",
+      firstName: "First name",
+      lastName: "Last name",
+      email: "Email",
+      phone: "Phone",
+      address: "Address",
+      city: "City",
+      country: "Country",
+      placeOrder: "PLACE ORDER",
+      processing: "Processing...",
+      summary: "Order summary",
+      note: "After placing your order, we will send a payment confirmation to your email with bank transfer details.",
+      success: {
+        title: "Order placed!",
+        body: "Thank you for your order. We will contact you shortly.",
+        order: "Order",
+        back: "Back to Home",
+      },
     },
     hero: {
       title: "D.O.M. EVENT AGENCY",

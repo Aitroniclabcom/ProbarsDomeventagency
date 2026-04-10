@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -195,7 +196,12 @@ export default function ShopPage() {
                       </p>
                     )}
                     <h3 className="text-lg font-serif mb-2 group-hover:text-[#C0A07B] transition-colors">
-                      {product.name}
+                      <Link
+                        href={`/shop/${product.slug || product.id}`}
+                        className="hover:text-[#C0A07B] transition-colors"
+                      >
+                        {product.name}
+                      </Link>
                     </h3>
                     <p
                       className="text-sm text-gray-500 mb-6 flex-grow font-light line-clamp-3"
