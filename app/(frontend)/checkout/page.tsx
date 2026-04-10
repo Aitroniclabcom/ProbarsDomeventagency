@@ -6,7 +6,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { Loader2, CheckCircle, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Loader2, CheckCircle, ShoppingBag, ArrowLeft, X } from "lucide-react";
 
 type FormData = {
   first_name: string;
@@ -17,6 +17,8 @@ type FormData = {
   city: string;
   country: string;
 };
+
+type PaymentMethodChoice = "bacs" | "stripe";
 
 const EMPTY_FORM: FormData = {
   first_name: "",
@@ -35,7 +37,13 @@ export default function CheckoutPage() {
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [orderId, setOrderId] = useState<number | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodChoice>("bacs");
+  const [bankTransferDone, setBankTransferDone] = useState<{
+    orderId: number;
+    total: string;
+  } | null>(null);
+  const [stripePaymentUrl, setStripePaymentUrl] = useState<string | null>(null);
+  const [stripeShowPayOverlay, setStripeShowPayOverlay] = useState(false);
 
   function getItemName(item: typeof items[0]) {
     if (language === "lv" && item.nameLv) return item.nameLv;
@@ -56,6 +64,7 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           billing: form,
+          paymentMethod,
           lineItems: items.map((item) => ({
             id: Number(item.id),
             quantity: item.quantity,
@@ -63,14 +72,20 @@ export default function CheckoutPage() {
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || "Failed to place order");
       }
 
-      const order = await res.json();
-      setOrderId(order.id);
       clearCart();
+
+      if (data.paymentMethod === "bacs") {
+        setBankTransferDone({ orderId: data.orderId, total: data.total });
+      } else if (data.paymentMethod === "stripe") {
+        setStripePaymentUrl(data.paymentUrl);
+        setStripeShowPayOverlay(false);
+      }
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -100,8 +115,9 @@ export default function CheckoutPage() {
     );
   }
 
-  // ── Success state ──────────────────────────────────────────────────────────
-  if (orderId) {
+  // ── Bank transfer thank you ────────────────────────────────────────────────
+  if (bankTransferDone) {
+    const { orderId, total } = bankTransferDone;
     return (
       <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
         <Navigation />
@@ -109,20 +125,95 @@ export default function CheckoutPage() {
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
             <CheckCircle className="w-20 h-20 text-[#C0A07B] mb-6" />
           </motion.div>
-          <h1 className="text-3xl font-serif mb-4">{t("checkout.success.title") || "Order placed!"}</h1>
-          <p className="text-gray-400 mb-2">
-            {t("checkout.success.body") || "Thank you for your order. We will contact you shortly."}
+          <h1 className="text-3xl font-serif mb-4">{t("checkout.success.title")}</h1>
+          <p className="text-[#C0A07B] text-lg mb-6">
+            {t("checkout.success.order")} #{orderId}
           </p>
-          <p className="text-[#C0A07B] text-sm mb-10">
-            {t("checkout.success.order") || "Order"} #{orderId}
-          </p>
+          <div className="w-full h-[1px] bg-white/10 mb-8" />
+          <div className="w-full text-left space-y-3 text-sm mb-10">
+            <p className="text-xs tracking-widest uppercase text-gray-400 mb-4">{t("checkout.bankDetails")}</p>
+            <p>
+              <span className="text-gray-500">{t("checkout.accountHolder")}: </span>
+              <span className="text-white">SIA PROBAR</span>
+            </p>
+            <p>
+              <span className="text-gray-500">{t("checkout.iban")}: </span>
+              <span className="text-white">LV36HABA0551045355405</span>
+            </p>
+            <p>
+              <span className="text-gray-500">{t("checkout.bankName")}: </span>
+              <span className="text-white">AS SWEDBANK, HABALV22</span>
+            </p>
+            <p>
+              <span className="text-gray-500">{t("checkout.amount")}: </span>
+              <span className="text-[#C0A07B]">€{total}</span>
+            </p>
+            <p>
+              <span className="text-gray-500">{t("checkout.paymentPurpose")}: </span>
+              <span className="text-white">
+                {t("checkout.success.order")} #{orderId}
+              </span>
+            </p>
+          </div>
           <button
             onClick={() => router.push("/")}
             className="bg-[#8C080C] hover:bg-[#a0090e] text-white px-8 py-3 text-xs tracking-widest uppercase transition-colors"
           >
-            {t("checkout.success.back") || "Back to Home"}
+            {t("checkout.success.back")}
           </button>
         </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // ── Stripe payment in progress (cart cleared, stay on site) ───────────────
+  if (!items.length && stripePaymentUrl) {
+    return (
+      <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
+        <Navigation />
+        <div className="min-h-[50vh]" aria-hidden />
+
+        {stripeShowPayOverlay && (
+          <div className="fixed inset-0 z-50 flex flex-col bg-black/90">
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setStripeShowPayOverlay(false)}
+              className="absolute top-4 right-4 z-[60] p-2 text-white/80 hover:text-white border border-white/20 hover:border-[#C0A07B] transition-colors"
+            >
+              <X size={22} />
+            </button>
+            <iframe
+              title={t("checkout.proceedToPayment")}
+              src={stripePaymentUrl}
+              className="w-full flex-1 min-h-0 border-0 bg-white"
+            />
+          </div>
+        )}
+
+        {!stripeShowPayOverlay && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 px-6">
+            <div className="relative w-full max-w-md text-center">
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setStripePaymentUrl(null)}
+                className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white border border-white/20 hover:border-[#C0A07B] transition-colors"
+              >
+                <X size={22} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setStripeShowPayOverlay(true)}
+                className="w-full bg-[#8C080C] hover:bg-[#a0090e] text-white py-4 text-xs tracking-widest uppercase transition-colors"
+              >
+                {t("checkout.proceedToPayment")}
+              </button>
+            </div>
+          </div>
+        )}
+
         <Footer />
       </div>
     );
@@ -201,6 +292,36 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            <div className="flex flex-col gap-2 pt-2">
+              <label className="text-xs tracking-widest uppercase text-gray-400">
+                {t("checkout.paymentMethod")}
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("bacs")}
+                  className={`border px-4 py-3 text-xs tracking-widest uppercase transition-colors ${
+                    paymentMethod === "bacs"
+                      ? "border-[#C0A07B] text-[#C0A07B] bg-white/5"
+                      : "border-white/10 text-gray-300 hover:border-[#C0A07B]"
+                  }`}
+                >
+                  {t("checkout.bankTransfer")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("stripe")}
+                  className={`border px-4 py-3 text-xs tracking-widest uppercase transition-colors ${
+                    paymentMethod === "stripe"
+                      ? "border-[#C0A07B] text-[#C0A07B] bg-white/5"
+                      : "border-white/10 text-gray-300 hover:border-[#C0A07B]"
+                  }`}
+                >
+                  {t("checkout.cardPayment")}
+                </button>
+              </div>
+            </div>
+
             {error && (
               <p className="text-[#8C080C] text-sm border border-[#8C080C]/30 bg-[#8C080C]/10 px-4 py-3">
                 {error}
@@ -262,6 +383,46 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {stripePaymentUrl && stripeShowPayOverlay && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black/90">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setStripeShowPayOverlay(false)}
+            className="absolute top-4 right-4 z-[60] p-2 text-white/80 hover:text-white border border-white/20 hover:border-[#C0A07B] transition-colors"
+          >
+            <X size={22} />
+          </button>
+          <iframe
+            title={t("checkout.proceedToPayment")}
+            src={stripePaymentUrl}
+            className="w-full flex-1 min-h-0 border-0 bg-white"
+          />
+        </div>
+      )}
+
+      {stripePaymentUrl && !stripeShowPayOverlay && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 px-6">
+          <div className="relative w-full max-w-md text-center">
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setStripePaymentUrl(null)}
+              className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white border border-white/20 hover:border-[#C0A07B] transition-colors"
+            >
+              <X size={22} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setStripeShowPayOverlay(true)}
+              className="w-full bg-[#8C080C] hover:bg-[#a0090e] text-white py-4 text-xs tracking-widest uppercase transition-colors"
+            >
+              {t("checkout.proceedToPayment")}
+            </button>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
