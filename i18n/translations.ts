@@ -56,7 +56,13 @@ export const translations = {
       note: "Pēc pasūtījuma apstiprināšanas nosūtīsim maksājuma apstiprinājumu uz jūsu e-pastu ar bankas pārskaitījuma datiem.",
       paymentMethod: "Maksājuma veids",
       bankTransfer: "Bankas pārskaitījums",
-      cardPayment: "Maksāt ar karti",
+      bankTransferHelp:
+        "Saņemsiet rekvizītus e-pastā pēc pasūtījuma. Maksājums notiek ar pārskaitījumu uz norādīto kontu.",
+      cardPayment: "Maksāt ar karti (Stripe)",
+      stripeSecureHelp:
+        "Šeit varēsiet norēķināties ar bankas karti, Apple Pay vai Google Pay (ja ieslēgts jūsu ierīcē un pārlūkā). Vispirms apstipriniet pasūtījumu — tad parādīsies droša maksājuma forma.",
+      stripeOrderCreated:
+        "Pasūtījums izveidots. Aizpildiet maksājumu zemāk — karte vai maks, kas piedāvāts jūsu ierīcē.",
       bankDetails: "Bankas rekvizīti",
       proceedToPayment: "Turpināt uz maksājumu",
       accountHolder: "Konta nosaukums",
@@ -67,6 +73,12 @@ export const translations = {
       success: {
         title: "Pasūtījums pieņemts!",
         body: "Paldies par jūsu pasūtījumu. Mēs ar jums sazināsimies tuvākajā laikā.",
+        order: "Pasūtījums",
+        back: "Atpakaļ uz sākumu",
+      },
+      successCard: {
+        title: "Maksājums saņemts!",
+        body: "Paldies! Jūsu maksājums ir apstrādāts. Mēs ar jums sazināsimies tuvākajā laikā.",
         order: "Pasūtījums",
         back: "Atpakaļ uz sākumu",
       },
@@ -309,7 +321,13 @@ export const translations = {
       note: "После подтверждения заказа мы отправим подтверждение оплаты на вашу электронную почту с реквизитами для банковского перевода.",
       paymentMethod: "Способ оплаты",
       bankTransfer: "Банковский перевод",
-      cardPayment: "Оплата картой",
+      bankTransferHelp:
+        "После оформления заказа мы отправим реквизиты на электронную почту. Оплата банковским переводом.",
+      cardPayment: "Картой (Stripe)",
+      stripeSecureHelp:
+        "Здесь можно оплатить картой, Apple Pay или Google Pay (если включено на устройстве и в браузере). Сначала подтвердите заказ — затем появится форма оплаты.",
+      stripeOrderCreated:
+        "Заказ создан. Заполните оплату ниже — карта или кошелёк, доступный на вашем устройстве.",
       bankDetails: "Банковские реквизиты",
       proceedToPayment: "Перейти к оплате",
       accountHolder: "Получатель",
@@ -320,6 +338,12 @@ export const translations = {
       success: {
         title: "Заказ принят!",
         body: "Спасибо за ваш заказ. Мы свяжемся с вами в ближайшее время.",
+        order: "Заказ",
+        back: "Вернуться на главную",
+      },
+      successCard: {
+        title: "Оплата получена!",
+        body: "Спасибо! Платёж обработан. Мы свяжемся с вами в ближайшее время.",
         order: "Заказ",
         back: "Вернуться на главную",
       },
@@ -562,7 +586,13 @@ export const translations = {
       note: "After placing your order, we will send a payment confirmation to your email with bank transfer details.",
       paymentMethod: "Payment method",
       bankTransfer: "Bank transfer",
-      cardPayment: "Pay by card",
+      bankTransferHelp:
+        "After you place the order, we email you the transfer details. You pay via bank transfer.",
+      cardPayment: "Card (Stripe)",
+      stripeSecureHelp:
+        "You can pay by card, Apple Pay, or Google Pay (when available on your device and browser). Confirm the order first — then the secure payment form appears here.",
+      stripeOrderCreated:
+        "Order created. Complete payment below — card or wallet offered for your device.",
       bankDetails: "Bank details",
       proceedToPayment: "Proceed to payment",
       accountHolder: "Account name",
@@ -573,6 +603,12 @@ export const translations = {
       success: {
         title: "Order placed!",
         body: "Thank you for your order. We will contact you shortly.",
+        order: "Order",
+        back: "Back to Home",
+      },
+      successCard: {
+        title: "Payment received!",
+        body: "Thank you! Your payment was processed. We will contact you shortly.",
         order: "Order",
         back: "Back to Home",
       },

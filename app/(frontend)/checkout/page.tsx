@@ -1,12 +1,38 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { Loader2, CheckCircle, ShoppingBag, ArrowLeft, X } from "lucide-react";
+import {
+  Loader2,
+  CheckCircle,
+  ShoppingBag,
+  ArrowLeft,
+  X,
+  Building2,
+  CreditCard,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { PaymentBrandIcons } from "@/components/checkout/PaymentBrandIcons";
+
+const StripePaymentForm = dynamic(
+  () =>
+    import("@/components/checkout/StripePaymentForm").then((m) => m.StripePaymentForm),
+  {
+    ssr: false,
+    loading: () => (
+      <p className="text-xs text-gray-500 py-3 border border-white/10 px-3 bg-white/[0.02]">
+        Loading payment…
+      </p>
+    ),
+  }
+);
 
 type FormData = {
   first_name: string;
@@ -30,6 +56,14 @@ const EMPTY_FORM: FormData = {
   country: "LV",
 };
 
+const STRIPE_PK = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
+
+type PendingStripe = {
+  clientSecret: string;
+  orderId: number;
+  total: string;
+};
+
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
   const { t, language } = useLanguage();
@@ -38,23 +72,88 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodChoice>("bacs");
+  const [bacsExpanded, setBacsExpanded] = useState(true);
+  const [stripeExpanded, setStripeExpanded] = useState(false);
   const [bankTransferDone, setBankTransferDone] = useState<{
+    orderId: number;
+    total: string;
+  } | null>(null);
+  const [cardPaidDone, setCardPaidDone] = useState<{
     orderId: number;
     total: string;
   } | null>(null);
   const [stripePaymentUrl, setStripePaymentUrl] = useState<string | null>(null);
   const [stripeShowPayOverlay, setStripeShowPayOverlay] = useState(false);
+  const [pendingStripe, setPendingStripe] = useState<PendingStripe | null>(null);
 
-  function getItemName(item: typeof items[0]) {
+  const handleStripeReturn = useCallback(async () => {
+    if (!STRIPE_PK || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const clientSecret = params.get("payment_intent_client_secret");
+    if (!clientSecret) return;
+
+    const { loadStripe } = await import("@stripe/stripe-js");
+    const stripe = await loadStripe(STRIPE_PK);
+    if (!stripe) return;
+
+    const { paymentIntent } = await stripe.retrievePaymentIntent(clientSecret);
+    if (paymentIntent?.status !== "succeeded") return;
+
+    const pi = paymentIntent as {
+      metadata?: { woo_order_id?: string };
+      amount_received?: number | null;
+      amount?: number | null;
+    };
+    const oid = pi.metadata?.woo_order_id;
+    const orderId = oid ? Number.parseInt(oid, 10) : 0;
+    const cents = pi.amount_received ?? pi.amount ?? 0;
+    const totalStr =
+      typeof cents === "number" ? (cents / 100).toFixed(2) : "0.00";
+
+    clearCart();
+    setPendingStripe(null);
+    setStripePaymentUrl(null);
+    setCardPaidDone({ orderId: Number.isFinite(orderId) ? orderId : 0, total: totalStr });
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [clearCart]);
+
+  useEffect(() => {
+    void handleStripeReturn();
+  }, [handleStripeReturn]);
+
+  function getItemName(item: (typeof items)[0]) {
     if (language === "lv" && item.nameLv) return item.nameLv;
     if (language === "ru" && item.nameRu) return item.nameRu;
     if (language === "en" && item.nameEn) return item.nameEn;
     return item.name;
   }
 
+  function onBacsHeaderClick() {
+    if (pendingStripe) return;
+    if (paymentMethod === "bacs") {
+      setBacsExpanded((e) => !e);
+    } else {
+      setPaymentMethod("bacs");
+      setStripeExpanded(false);
+      setBacsExpanded(true);
+    }
+  }
+
+  function onStripeHeaderClick() {
+    if (paymentMethod === "stripe") {
+      if (pendingStripe) return;
+      setStripeExpanded((e) => !e);
+    } else {
+      setPaymentMethod("stripe");
+      setBacsExpanded(false);
+      setStripeExpanded(true);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!items.length) return;
+    if (paymentMethod === "stripe" && pendingStripe) return;
     setLoading(true);
     setError(null);
 
@@ -78,16 +177,26 @@ export default function CheckoutPage() {
         throw new Error(data.error || "Failed to place order");
       }
 
-      clearCart();
-
       if (data.paymentMethod === "bacs") {
+        clearCart();
         setBankTransferDone({ orderId: data.orderId, total: data.total });
       } else if (data.paymentMethod === "stripe") {
-        setStripePaymentUrl(data.paymentUrl);
-        setStripeShowPayOverlay(false);
+        if (data.stripeClientSecret && STRIPE_PK) {
+          setPendingStripe({
+            clientSecret: data.stripeClientSecret,
+            orderId: data.orderId,
+            total: data.total,
+          });
+          setStripeExpanded(true);
+        } else {
+          clearCart();
+          setStripePaymentUrl(data.paymentUrl);
+          setStripeShowPayOverlay(false);
+        }
       }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -115,7 +224,36 @@ export default function CheckoutPage() {
     );
   }
 
-  // ── Bank transfer thank you ────────────────────────────────────────────────
+  if (cardPaidDone) {
+    const { orderId, total } = cardPaidDone;
+    return (
+      <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
+        <Navigation />
+        <div className="container mx-auto px-6 pt-40 pb-24 flex flex-col items-center text-center max-w-lg">
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+            <CheckCircle className="w-20 h-20 text-[#C0A07B] mb-6" />
+          </motion.div>
+          <h1 className="text-3xl font-serif mb-4">{t("checkout.successCard.title")}</h1>
+          <p className="text-[#C0A07B] text-lg mb-6">
+            {t("checkout.successCard.order")} #{orderId}
+          </p>
+          <p className="text-gray-400 text-sm mb-10">{t("checkout.successCard.body")}</p>
+          <p className="text-sm text-gray-500 mb-10">
+            <span className="text-gray-500">{t("checkout.amount")}: </span>
+            <span className="text-[#C0A07B]">€{total}</span>
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="bg-[#8C080C] hover:bg-[#a0090e] text-white px-8 py-3 text-xs tracking-widest uppercase transition-colors"
+          >
+            {t("checkout.successCard.back")}
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   if (bankTransferDone) {
     const { orderId, total } = bankTransferDone;
     return (
@@ -167,7 +305,6 @@ export default function CheckoutPage() {
     );
   }
 
-  // ── Stripe payment in progress (cart cleared, stay on site) ───────────────
   if (!items.length && stripePaymentUrl) {
     return (
       <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
@@ -219,8 +356,7 @@ export default function CheckoutPage() {
     );
   }
 
-  // ── Empty cart redirect ────────────────────────────────────────────────────
-  if (!items.length) {
+  if (!items.length && !pendingStripe) {
     return (
       <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
         <Navigation />
@@ -239,6 +375,13 @@ export default function CheckoutPage() {
     );
   }
 
+  const summaryNote =
+    paymentMethod === "bacs"
+      ? t("checkout.note")
+      : pendingStripe
+        ? t("checkout.stripeOrderCreated")
+        : t("checkout.stripeSecureHelp");
+
   return (
     <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
       <Navigation />
@@ -254,8 +397,6 @@ export default function CheckoutPage() {
 
       <div className="container mx-auto px-6 py-16 max-w-5xl">
         <div className="grid lg:grid-cols-2 gap-12">
-
-          {/* Billing form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <h2 className="text-xl font-serif mb-2 text-[#C0A07B]">
               {t("checkout.billing") || "Billing details"}
@@ -296,29 +437,88 @@ export default function CheckoutPage() {
               <label className="text-xs tracking-widest uppercase text-gray-400">
                 {t("checkout.paymentMethod")}
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("bacs")}
-                  className={`border px-4 py-3 text-xs tracking-widest uppercase transition-colors ${
+
+              <div className="flex flex-col gap-3">
+                <div
+                  className={`border transition-colors ${
                     paymentMethod === "bacs"
-                      ? "border-[#C0A07B] text-[#C0A07B] bg-white/5"
-                      : "border-white/10 text-gray-300 hover:border-[#C0A07B]"
+                      ? "border-[#C0A07B]/80 bg-white/[0.03]"
+                      : "border-white/10"
                   }`}
                 >
-                  {t("checkout.bankTransfer")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod("stripe")}
-                  className={`border px-4 py-3 text-xs tracking-widest uppercase transition-colors ${
+                  <button
+                    type="button"
+                    onClick={onBacsHeaderClick}
+                    disabled={!!pendingStripe}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left disabled:opacity-40"
+                  >
+                    <Building2 className="h-5 w-5 shrink-0 text-[#C0A07B]" aria-hidden />
+                    <span className="flex-1 text-xs tracking-widest uppercase text-white">
+                      {t("checkout.bankTransfer")}
+                    </span>
+                    {bacsExpanded ? (
+                      <ChevronUp className="h-4 w-4 shrink-0 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 shrink-0 text-gray-500" />
+                    )}
+                  </button>
+                  {paymentMethod === "bacs" && bacsExpanded && (
+                    <div className="border-t border-white/10 px-4 py-3 text-xs leading-relaxed text-gray-400">
+                      {t("checkout.bankTransferHelp")}
+                    </div>
+                  )}
+                </div>
+
+                <div
+                  className={`border transition-colors ${
                     paymentMethod === "stripe"
-                      ? "border-[#C0A07B] text-[#C0A07B] bg-white/5"
-                      : "border-white/10 text-gray-300 hover:border-[#C0A07B]"
+                      ? "border-[#C0A07B]/80 bg-white/[0.03]"
+                      : "border-white/10"
                   }`}
                 >
-                  {t("checkout.cardPayment")}
-                </button>
+                  <button
+                    type="button"
+                    onClick={onStripeHeaderClick}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left"
+                  >
+                    <CreditCard className="h-5 w-5 shrink-0 text-[#C0A07B]" aria-hidden />
+                    <span className="flex-1 text-xs tracking-widest uppercase text-white">
+                      {t("checkout.cardPayment")}
+                    </span>
+                    <PaymentBrandIcons className="hidden sm:flex shrink-0" />
+                    {stripeExpanded ? (
+                      <ChevronUp className="h-4 w-4 shrink-0 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 shrink-0 text-gray-500" />
+                    )}
+                  </button>
+                  {paymentMethod === "stripe" && stripeExpanded && (
+                    <div className="space-y-4 border-t border-white/10 px-4 py-4">
+                      <PaymentBrandIcons className="sm:hidden" />
+                      <p className="text-xs leading-relaxed text-gray-400">
+                        {pendingStripe ? t("checkout.stripeOrderCreated") : t("checkout.stripeSecureHelp")}
+                      </p>
+                      {pendingStripe && STRIPE_PK ? (
+                        <StripePaymentForm
+                          clientSecret={pendingStripe.clientSecret}
+                          publishableKey={STRIPE_PK}
+                          orderTotalLabel={`€${pendingStripe.total}`}
+                          payLabel={t("checkout.proceedToPayment")}
+                          processingLabel={t("checkout.processing")}
+                          returnPath="/checkout"
+                          onSuccess={() => {
+                            clearCart();
+                            setCardPaidDone({
+                              orderId: pendingStripe.orderId,
+                              total: pendingStripe.total,
+                            });
+                            setPendingStripe(null);
+                          }}
+                        />
+                      ) : null}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -330,18 +530,20 @@ export default function CheckoutPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (paymentMethod === "stripe" && !!pendingStripe)}
               className="mt-2 bg-[#8C080C] hover:bg-[#a0090e] text-white py-4 text-xs tracking-widest uppercase transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <><Loader2 size={16} className="animate-spin" /> {t("checkout.processing") || "Processing…"}</>
+                <>
+                  <Loader2 size={16} className="animate-spin" />{" "}
+                  {t("checkout.processing") || "Processing…"}
+                </>
               ) : (
                 t("checkout.placeOrder") || "Place Order"
               )}
             </button>
           </form>
 
-          {/* Order summary */}
           <div>
             <h2 className="text-xl font-serif mb-6 text-[#C0A07B]">
               {t("checkout.summary") || "Order summary"}
@@ -353,7 +555,11 @@ export default function CheckoutPage() {
                   <div key={item.id} className="flex gap-4 p-4 items-center">
                     <div className="w-16 h-16 bg-black/20 overflow-hidden shrink-0">
                       {item.image ? (
-                        <img src={item.image} alt={getItemName(item)} className="w-full h-full object-cover" />
+                        <img
+                          src={item.image}
+                          alt={getItemName(item)}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <ShoppingBag className="w-6 h-6 text-gray-700" />
@@ -369,17 +575,12 @@ export default function CheckoutPage() {
                 );
               })}
               <div className="px-4 py-5 flex justify-between items-center">
-                <span className="text-gray-400 tracking-wider text-sm">
-                  {t("shop.cart.total")}
-                </span>
+                <span className="text-gray-400 tracking-wider text-sm">{t("shop.cart.total")}</span>
                 <span className="text-xl font-serif text-[#C0A07B]">€{total.toFixed(2)}</span>
               </div>
             </div>
 
-            <p className="text-xs text-gray-600 mt-4 leading-relaxed">
-              {t("checkout.note") ||
-                "After placing your order, we will send a payment confirmation to your email with bank transfer details."}
-            </p>
+            <p className="text-xs text-gray-600 mt-4 leading-relaxed">{summaryNote}</p>
           </div>
         </div>
       </div>

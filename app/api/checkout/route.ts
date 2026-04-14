@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWooCommerceBaseUrl } from "@/lib/woocommerce/config";
+import { wooRestOrdersCreateUrl } from "@/lib/woocommerce/order-rest";
+import { getStripe, stripePublishableConfigured } from "@/lib/stripe/server";
 
 const WC_PAYMENT: Record<string, string> = {
   bacs: "Direct bank transfer",
   stripe: "Credit / Debit Card",
 };
 
-function wooRestOrdersUrl(consumerKey: string, consumerSecret: string) {
-  const url = new URL(`${getWooCommerceBaseUrl()}/wp-json/wc/v3/orders`);
-  url.searchParams.set("consumer_key", consumerKey);
-  url.searchParams.set("consumer_secret", consumerSecret);
-  return url.toString();
+function toStripeMinorUnits(totalStr: string): number | null {
+  const n = Number.parseFloat(String(totalStr).replace(",", "."));
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.round(n * 100);
 }
 
 export async function POST(req: NextRequest) {
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
     };
 
     // Query-string auth: many PHP / reverse-proxy setups strip Authorization: Basic.
-    const endpoint = wooRestOrdersUrl(consumerKey, consumerSecret);
+    const endpoint = wooRestOrdersCreateUrl(consumerKey, consumerSecret);
 
     const res = await fetch(endpoint, {
       method: "POST",
@@ -93,8 +94,14 @@ export async function POST(req: NextRequest) {
     const rawText = await res.text();
     const bodyText = rawText.replace(/^\uFEFF/, "").trim();
 
-    let order: { id?: number; order_key?: string; total?: string; message?: string; code?: string } =
-      {};
+    let order: {
+      id?: number;
+      order_key?: string;
+      total?: string;
+      currency?: string;
+      message?: string;
+      code?: string;
+    } = {};
     try {
       order = JSON.parse(bodyText) as typeof order;
     } catch {
@@ -132,11 +139,37 @@ export async function POST(req: NextRequest) {
     const paymentUrl = `${apiBase}/checkout/order-pay/${orderId}/?pay_for_order=true&key=${encodeURIComponent(orderKey)}`;
     const total = order.total ?? "0.00";
 
+    let stripeClientSecret: string | undefined;
+    if (paymentMethod === "stripe") {
+      const stripe = getStripe();
+      const minor = toStripeMinorUnits(total);
+      const currency = (order.currency || "EUR").toLowerCase();
+      if (stripe && stripePublishableConfigured() && minor != null && minor >= 50) {
+        try {
+          const pi = await stripe.paymentIntents.create({
+            amount: minor,
+            currency,
+            automatic_payment_methods: { enabled: true },
+            metadata: {
+              woo_order_id: String(orderId),
+              woo_order_key: String(orderKey),
+            },
+          });
+          stripeClientSecret = pi.client_secret ?? undefined;
+        } catch (e) {
+          console.error("[Stripe] payment_intents.create failed:", e);
+        }
+      } else if (minor != null && minor < 50) {
+        console.warn("[Stripe] Order total below Stripe minimum (0.50); using WooCommerce pay URL only.");
+      }
+    }
+
     return NextResponse.json({
       orderId,
       total,
       paymentMethod,
       paymentUrl,
+      ...(stripeClientSecret ? { stripeClientSecret } : {}),
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to create order";
