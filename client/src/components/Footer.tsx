@@ -64,7 +64,6 @@ export function Footer() {
           </div>
           <div className="flex justify-between items-center text-gray-600 font-sans tracking-widest uppercase">
             <span className="text-xs">{t("footer.copyright")}</span>
-            <span className="text-[10px]">{t("footer.designed")}</span>
           </div>
         </div>
       </div>

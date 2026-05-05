@@ -266,7 +266,7 @@ export const translations = {
         bank: "AS “SWEDBANK”, HABALV22 LV36HABA0551045355405"
       },
       copyright: "© 2026 D.O.M. Event Agency",
-      designed: "Developed by aitroniclab.com"
+      designed: ""
     }
   },
   ru: {
@@ -531,7 +531,7 @@ export const translations = {
         bank: "AS “SWEDBANK”, HABALV22 LV36HABA0551045355405"
       },
       copyright: "© 2026 D.O.M. Event Agency",
-      designed: "Developed by aitroniclab.com"
+      designed: ""
     }
   },
   en: {
@@ -796,7 +796,7 @@ export const translations = {
         bank: "AS “SWEDBANK”, HABALV22 LV36HABA0551045355405"
       },
       copyright: "© 2026 D.O.M. Event Agency",
-      designed: "Developed by aitroniclab.com"
+      designed: ""
     }
   }
 };
