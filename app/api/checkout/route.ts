@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWooCommerceBaseUrl } from "@/lib/woocommerce/config";
 import { wooRestOrdersCreateUrl } from "@/lib/woocommerce/order-rest";
-import { getStripe, stripePublishableConfigured } from "@/lib/stripe/server";
+import { getStripe } from "@/lib/stripe/server";
 
 const WC_PAYMENT: Record<string, string> = {
   bacs: "Direct bank transfer",
@@ -44,6 +44,20 @@ export async function POST(req: NextRequest) {
 
     if (paymentMethod !== "bacs" && paymentMethod !== "stripe") {
       return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
+    }
+
+    if (paymentMethod === "stripe") {
+      const stripe = getStripe();
+      const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
+      if (!stripe || !publishableKey) {
+        return NextResponse.json(
+          {
+            error:
+              "Card payments are not configured. Set STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY on the server.",
+          },
+          { status: 503 }
+        );
+      }
     }
 
     let country = (billing.country || "LV").toString();
@@ -140,28 +154,54 @@ export async function POST(req: NextRequest) {
     const total = order.total ?? "0.00";
 
     let stripeClientSecret: string | undefined;
+    let stripeError: string | undefined;
     if (paymentMethod === "stripe") {
       const stripe = getStripe();
       const minor = toStripeMinorUnits(total);
       const currency = (order.currency || "EUR").toLowerCase();
-      if (stripe && stripePublishableConfigured() && minor != null && minor >= 50) {
+
+      if (!stripe) {
+        stripeError = "Stripe secret key is not configured";
+      } else if (minor == null) {
+        stripeError = "Invalid order total for card payment";
+      } else if (minor < 50) {
+        stripeError = "Order total is below the minimum for card payments (€0.50)";
+      } else {
         try {
           const pi = await stripe.paymentIntents.create({
             amount: minor,
             currency,
             automatic_payment_methods: { enabled: true },
+            receipt_email: billing.email,
             metadata: {
               woo_order_id: String(orderId),
               woo_order_key: String(orderKey),
             },
           });
           stripeClientSecret = pi.client_secret ?? undefined;
+          if (!stripeClientSecret) {
+            stripeError = "Stripe did not return a payment session";
+          }
         } catch (e) {
+          const msg = e instanceof Error ? e.message : "Failed to start card payment";
           console.error("[Stripe] payment_intents.create failed:", e);
+          stripeError = msg;
         }
-      } else if (minor != null && minor < 50) {
-        console.warn("[Stripe] Order total below Stripe minimum (0.50); using WooCommerce pay URL only.");
       }
+    }
+
+    if (paymentMethod === "stripe" && !stripeClientSecret) {
+      return NextResponse.json(
+        {
+          error:
+            stripeError ||
+            "Could not start card payment. Check Stripe API keys or try bank transfer.",
+          orderId,
+          total,
+          paymentMethod,
+        },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json({

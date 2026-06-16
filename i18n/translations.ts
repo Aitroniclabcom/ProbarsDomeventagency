@@ -63,6 +63,8 @@ export const translations = {
         "Šeit varēsiet norēķināties ar bankas karti, Apple Pay vai Google Pay (ja ieslēgts jūsu ierīcē un pārlūkā). Vispirms apstipriniet pasūtījumu — tad parādīsies droša maksājuma forma.",
       stripeOrderCreated:
         "Pasūtījums izveidots. Aizpildiet maksājumu zemāk — karte vai maks, kas piedāvāts jūsu ierīcē.",
+      stripeUnavailable:
+        "Maksājums ar karti šobrīd nav pieejams. Izvēlieties bankas pārskaitījumu vai sazinieties ar mums.",
       bankDetails: "Bankas rekvizīti",
       proceedToPayment: "Turpināt uz maksājumu",
       accountHolder: "Konta nosaukums",
@@ -328,6 +330,8 @@ export const translations = {
         "Здесь можно оплатить картой, Apple Pay или Google Pay (если включено на устройстве и в браузере). Сначала подтвердите заказ — затем появится форма оплаты.",
       stripeOrderCreated:
         "Заказ создан. Заполните оплату ниже — карта или кошелёк, доступный на вашем устройстве.",
+      stripeUnavailable:
+        "Оплата картой сейчас недоступна. Выберите банковский перевод или свяжитесь с нами.",
       bankDetails: "Банковские реквизиты",
       proceedToPayment: "Перейти к оплате",
       accountHolder: "Получатель",
@@ -593,6 +597,8 @@ export const translations = {
         "You can pay by card, Apple Pay, or Google Pay (when available on your device and browser). Confirm the order first — then the secure payment form appears here.",
       stripeOrderCreated:
         "Order created. Complete payment below — card or wallet offered for your device.",
+      stripeUnavailable:
+        "Card payment is not available right now. Choose bank transfer or contact us.",
       bankDetails: "Bank details",
       proceedToPayment: "Proceed to payment",
       accountHolder: "Account name",

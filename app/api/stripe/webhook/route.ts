@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/server";
-import { wooRestOrderByIdUrl } from "@/lib/woocommerce/order-rest";
+import { markWooOrderPaid } from "@/lib/woocommerce/mark-order-paid";
 
 export async function POST(req: NextRequest) {
   const stripe = getStripe();
@@ -34,27 +34,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    const consumerKey = process.env.WOOCOMMERCE_CONSUMER_KEY;
-    const consumerSecret = process.env.WOOCOMMERCE_CONSUMER_SECRET;
-    if (!consumerKey || !consumerSecret) {
-      console.error("[Stripe webhook] WooCommerce credentials missing; cannot mark order paid");
-      return NextResponse.json({ received: true });
-    }
-
-    const url = wooRestOrderByIdUrl(orderId, consumerKey, consumerSecret);
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        set_paid: true,
-        transaction_id: pi.id,
-      }),
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("[Stripe webhook] WooCommerce PUT order failed", res.status, text.slice(0, 400));
+    const result = await markWooOrderPaid(orderId, pi.id);
+    if (!result.ok) {
+      console.error("[Stripe webhook] WooCommerce mark paid failed:", result.error);
     }
   }
 

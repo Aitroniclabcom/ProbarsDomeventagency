@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   PaymentElement,
   useStripe,
@@ -16,7 +16,7 @@ type InnerProps = {
   payLabel: string;
   processingLabel: string;
   returnPath: string;
-  onSuccess: () => void;
+  onSuccess: (paymentIntentId: string) => void;
 };
 
 function InnerForm({
@@ -36,19 +36,34 @@ function InnerForm({
     if (!stripe || !elements) return;
     setBusy(true);
     setMsg(null);
-    const { error } = await stripe.confirmPayment({
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}${returnPath}`,
       },
       redirect: "if_required",
     });
+
     if (error) {
       setMsg(error.message ?? "Payment failed");
       setBusy(false);
       return;
     }
-    onSuccess();
+
+    if (paymentIntent?.status === "succeeded") {
+      onSuccess(paymentIntent.id);
+      setBusy(false);
+      return;
+    }
+
+    if (paymentIntent?.status === "processing") {
+      setMsg("Payment is processing. Please wait…");
+      setBusy(false);
+      return;
+    }
+
+    setMsg("Payment could not be completed. Please try again.");
     setBusy(false);
   }
 
@@ -103,13 +118,18 @@ export function StripePaymentForm({
   publishableKey,
   ...inner
 }: Props) {
+  const stripePromise = useMemo(
+    () => loadStripe(publishableKey),
+    [publishableKey]
+  );
+
   const options: StripeElementsOptions = {
     clientSecret,
     appearance,
   };
 
   return (
-    <Elements key={clientSecret} stripe={loadStripe(publishableKey)} options={options}>
+    <Elements key={clientSecret} stripe={stripePromise} options={options}>
       <InnerForm {...inner} />
     </Elements>
   );

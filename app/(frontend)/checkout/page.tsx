@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
+import { CartDrawer } from "@/components/CartDrawer";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -13,7 +14,6 @@ import {
   CheckCircle,
   ShoppingBag,
   ArrowLeft,
-  X,
   Building2,
   CreditCard,
   ChevronDown,
@@ -56,8 +56,6 @@ const EMPTY_FORM: FormData = {
   country: "LV",
 };
 
-const STRIPE_PK = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
-
 type PendingStripe = {
   clientSecret: string;
   orderId: number;
@@ -71,9 +69,9 @@ export default function CheckoutPage() {
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodChoice>("bacs");
-  const [bacsExpanded, setBacsExpanded] = useState(true);
-  const [stripeExpanded, setStripeExpanded] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodChoice>("stripe");
+  const [bacsExpanded, setBacsExpanded] = useState(false);
+  const [stripeExpanded, setStripeExpanded] = useState(true);
   const [bankTransferDone, setBankTransferDone] = useState<{
     orderId: number;
     total: string;
@@ -82,24 +80,51 @@ export default function CheckoutPage() {
     orderId: number;
     total: string;
   } | null>(null);
-  const [stripePaymentUrl, setStripePaymentUrl] = useState<string | null>(null);
-  const [stripeShowPayOverlay, setStripeShowPayOverlay] = useState(false);
   const [pendingStripe, setPendingStripe] = useState<PendingStripe | null>(null);
+  const [stripePk, setStripePk] = useState<string | null>(null);
+  const [stripeConfigured, setStripeConfigured] = useState<boolean | null>(null);
+
+  async function confirmOrderPaid(orderId: number, paymentIntentId: string) {
+    try {
+      await fetch("/api/checkout/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, paymentIntentId }),
+      });
+    } catch {
+      // Webhook may still mark the order paid; do not block the success screen.
+    }
+  }
+
+  useEffect(() => {
+    fetch("/api/stripe/config")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) {
+          setStripeConfigured(false);
+          return;
+        }
+        setStripePk(typeof data.publishableKey === "string" ? data.publishableKey : null);
+        setStripeConfigured(Boolean(data.configured));
+      })
+      .catch(() => setStripeConfigured(false));
+  }, []);
 
   const handleStripeReturn = useCallback(async () => {
-    if (!STRIPE_PK || typeof window === "undefined") return;
+    if (!stripePk || typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const clientSecret = params.get("payment_intent_client_secret");
     if (!clientSecret) return;
 
     const { loadStripe } = await import("@stripe/stripe-js");
-    const stripe = await loadStripe(STRIPE_PK);
+    const stripe = await loadStripe(stripePk);
     if (!stripe) return;
 
     const { paymentIntent } = await stripe.retrievePaymentIntent(clientSecret);
     if (paymentIntent?.status !== "succeeded") return;
 
     const pi = paymentIntent as {
+      id: string;
       metadata?: { woo_order_id?: string };
       amount_received?: number | null;
       amount?: number | null;
@@ -110,12 +135,15 @@ export default function CheckoutPage() {
     const totalStr =
       typeof cents === "number" ? (cents / 100).toFixed(2) : "0.00";
 
+    if (Number.isFinite(orderId) && orderId > 0) {
+      await confirmOrderPaid(orderId, pi.id);
+    }
+
     clearCart();
     setPendingStripe(null);
-    setStripePaymentUrl(null);
     setCardPaidDone({ orderId: Number.isFinite(orderId) ? orderId : 0, total: totalStr });
     window.history.replaceState({}, "", window.location.pathname);
-  }, [clearCart]);
+  }, [clearCart, stripePk]);
 
   useEffect(() => {
     void handleStripeReturn();
@@ -181,18 +209,19 @@ export default function CheckoutPage() {
         clearCart();
         setBankTransferDone({ orderId: data.orderId, total: data.total });
       } else if (data.paymentMethod === "stripe") {
-        if (data.stripeClientSecret && STRIPE_PK) {
-          setPendingStripe({
-            clientSecret: data.stripeClientSecret,
-            orderId: data.orderId,
-            total: data.total,
-          });
-          setStripeExpanded(true);
-        } else {
-          clearCart();
-          setStripePaymentUrl(data.paymentUrl);
-          setStripeShowPayOverlay(false);
+        if (!data.stripeClientSecret || !stripePk) {
+          throw new Error(
+            data.error ||
+              t("checkout.stripeUnavailable") ||
+              "Card payment could not be started. Try bank transfer or contact us."
+          );
         }
+        setPendingStripe({
+          clientSecret: data.stripeClientSecret,
+          orderId: data.orderId,
+          total: data.total,
+        });
+        setStripeExpanded(true);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong";
@@ -305,61 +334,11 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!items.length && stripePaymentUrl) {
-    return (
-      <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
-        <Navigation />
-        <div className="min-h-[50vh]" aria-hidden />
-
-        {stripeShowPayOverlay && (
-          <div className="fixed inset-0 z-50 flex flex-col bg-black/90">
-            <button
-              type="button"
-              aria-label="Close"
-              onClick={() => setStripeShowPayOverlay(false)}
-              className="absolute top-4 right-4 z-[60] p-2 text-white/80 hover:text-white border border-white/20 hover:border-[#C0A07B] transition-colors"
-            >
-              <X size={22} />
-            </button>
-            <iframe
-              title={t("checkout.proceedToPayment")}
-              src={stripePaymentUrl}
-              className="w-full flex-1 min-h-0 border-0 bg-white"
-            />
-          </div>
-        )}
-
-        {!stripeShowPayOverlay && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 px-6">
-            <div className="relative w-full max-w-md text-center">
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setStripePaymentUrl(null)}
-                className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white border border-white/20 hover:border-[#C0A07B] transition-colors"
-              >
-                <X size={22} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setStripeShowPayOverlay(true)}
-                className="w-full bg-[#8C080C] hover:bg-[#a0090e] text-white py-4 text-xs tracking-widest uppercase transition-colors"
-              >
-                {t("checkout.proceedToPayment")}
-              </button>
-            </div>
-          </div>
-        )}
-
-        <Footer />
-      </div>
-    );
-  }
-
   if (!items.length && !pendingStripe) {
     return (
       <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
         <Navigation />
+        <CartDrawer />
         <div className="container mx-auto px-6 pt-40 pb-24 flex flex-col items-center text-center max-w-lg">
           <ShoppingBag className="w-16 h-16 text-gray-600 mb-6" />
           <p className="text-gray-400 mb-8">{t("shop.cart.empty")}</p>
@@ -385,6 +364,7 @@ export default function CheckoutPage() {
   return (
     <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
       <Navigation />
+      <CartDrawer />
 
       <div className="pt-32 pb-12 bg-[#1a1a1a]">
         <div className="container mx-auto px-6 text-center">
@@ -498,15 +478,21 @@ export default function CheckoutPage() {
                       <p className="text-xs leading-relaxed text-gray-400">
                         {pendingStripe ? t("checkout.stripeOrderCreated") : t("checkout.stripeSecureHelp")}
                       </p>
-                      {pendingStripe && STRIPE_PK ? (
+                      {stripeConfigured === false && (
+                        <p className="text-xs text-[#8C080C] border border-[#8C080C]/30 bg-[#8C080C]/10 px-3 py-2">
+                          {t("checkout.stripeUnavailable")}
+                        </p>
+                      )}
+                      {pendingStripe && stripePk ? (
                         <StripePaymentForm
                           clientSecret={pendingStripe.clientSecret}
-                          publishableKey={STRIPE_PK}
+                          publishableKey={stripePk}
                           orderTotalLabel={`€${pendingStripe.total}`}
                           payLabel={t("checkout.proceedToPayment")}
                           processingLabel={t("checkout.processing")}
                           returnPath="/checkout"
-                          onSuccess={() => {
+                          onSuccess={async (paymentIntentId) => {
+                            await confirmOrderPaid(pendingStripe.orderId, paymentIntentId);
                             clearCart();
                             setCardPaidDone({
                               orderId: pendingStripe.orderId,
@@ -530,7 +516,11 @@ export default function CheckoutPage() {
 
             <button
               type="submit"
-              disabled={loading || (paymentMethod === "stripe" && !!pendingStripe)}
+              disabled={
+                loading ||
+                (paymentMethod === "stripe" && !!pendingStripe) ||
+                (paymentMethod === "stripe" && stripeConfigured === false)
+              }
               className="mt-2 bg-[#8C080C] hover:bg-[#a0090e] text-white py-4 text-xs tracking-widest uppercase transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
@@ -584,46 +574,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-
-      {stripePaymentUrl && stripeShowPayOverlay && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-black/90">
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={() => setStripeShowPayOverlay(false)}
-            className="absolute top-4 right-4 z-[60] p-2 text-white/80 hover:text-white border border-white/20 hover:border-[#C0A07B] transition-colors"
-          >
-            <X size={22} />
-          </button>
-          <iframe
-            title={t("checkout.proceedToPayment")}
-            src={stripePaymentUrl}
-            className="w-full flex-1 min-h-0 border-0 bg-white"
-          />
-        </div>
-      )}
-
-      {stripePaymentUrl && !stripeShowPayOverlay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 px-6">
-          <div className="relative w-full max-w-md text-center">
-            <button
-              type="button"
-              aria-label="Close"
-              onClick={() => setStripePaymentUrl(null)}
-              className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white border border-white/20 hover:border-[#C0A07B] transition-colors"
-            >
-              <X size={22} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setStripeShowPayOverlay(true)}
-              className="w-full bg-[#8C080C] hover:bg-[#a0090e] text-white py-4 text-xs tracking-widest uppercase transition-colors"
-            >
-              {t("checkout.proceedToPayment")}
-            </button>
-          </div>
-        </div>
-      )}
 
       <Footer />
     </div>
