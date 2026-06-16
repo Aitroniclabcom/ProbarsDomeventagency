@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +21,7 @@ export default function ShopProductPage() {
   const { addToCart } = useCart();
   const { t } = useLanguage();
   const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   const { data: product, isLoading, isError } = useQuery<FrontendProduct | null>({
     queryKey: ["product", slug],
@@ -64,6 +65,17 @@ export default function ShopProductPage() {
   const isOnSale = product ? product.isOnSale && product.salePrice !== null : false;
   const displayPrice = product && isOnSale ? product.salePrice! : product?.price ?? 0;
 
+  const gallery = product?.gallery?.length
+    ? product.gallery
+    : product?.image
+      ? [product.image]
+      : [];
+  const mainImage = gallery[selectedImage] ?? product?.image ?? null;
+
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [product?.id]);
+
   return (
     <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans selection:bg-[#8C080C] selection:text-white">
       <Navigation />
@@ -103,35 +115,55 @@ export default function ShopProductPage() {
             animate={{ opacity: 1, y: 0 }}
             className="grid md:grid-cols-2 gap-10 lg:gap-16 max-w-6xl mx-auto"
           >
-            <div className="relative aspect-video md:aspect-square overflow-hidden bg-black/20 border border-white/5">
-              {product.image ? (
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-[#2a2a2a]">
-                  <ShoppingBag className="w-24 h-24 text-gray-700" />
-                </div>
-              )}
-
-              <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
-                {isOnSale && (
-                  <span className="bg-white/10 text-gray-400 text-xs px-2 py-1 font-medium tracking-widest line-through">
-                    €{product.regularPrice.toFixed(2)}
-                  </span>
+            <div className="flex flex-col gap-4">
+              <div className="relative aspect-square overflow-hidden bg-black/20 border border-white/5">
+                {mainImage ? (
+                  <img
+                    src={mainImage}
+                    alt={product.name}
+                    className="w-full h-full object-contain p-8"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-[#2a2a2a]">
+                    <ShoppingBag className="w-24 h-24 text-gray-700" />
+                  </div>
                 )}
-                <span className="bg-[#8C080C] text-white text-xs px-2 py-1 font-medium tracking-widest">
-                  €{displayPrice.toFixed(2)}
-                </span>
+
+                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+                  {isOnSale && (
+                    <span className="bg-white/10 text-gray-400 text-xs px-2 py-1 font-medium tracking-widest line-through">
+                      €{product.regularPrice.toFixed(2)}
+                    </span>
+                  )}
+                  <span className="bg-[#8C080C] text-white text-xs px-2 py-1 font-medium tracking-widest">
+                    €{displayPrice.toFixed(2)}
+                  </span>
+                </div>
+
+                {outOfStock && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <span className="text-xs tracking-widest uppercase text-gray-300 border border-gray-600 px-3 py-1">
+                      {t("shop.outOfStock") || "Out of Stock"}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {outOfStock && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                  <span className="text-xs tracking-widest uppercase text-gray-300 border border-gray-600 px-3 py-1">
-                    {t("shop.outOfStock") || "Out of Stock"}
-                  </span>
+              {gallery.length > 1 && (
+                <div className="flex gap-3 overflow-x-auto pb-1">
+                  {gallery.map((src, i) => (
+                    <button
+                      key={`${src}-${i}`}
+                      type="button"
+                      aria-label={`${product.name} – image ${i + 1}`}
+                      onClick={() => setSelectedImage(i)}
+                      className={`relative w-20 h-20 flex-shrink-0 overflow-hidden border bg-black/20 transition-colors ${
+                        selectedImage === i ? "border-[#C0A07B]" : "border-white/10 hover:border-white/30"
+                      }`}
+                    >
+                      <img src={src} alt="" className="w-full h-full object-contain p-1" />
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

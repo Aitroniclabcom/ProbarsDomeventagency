@@ -154,12 +154,15 @@ export default function ShopPage() {
                   className="group bg-[#1a1a1a] border border-white/5 overflow-hidden flex flex-col"
                 >
                   {/* Image */}
-                  <div className="relative aspect-video overflow-hidden bg-black/20">
+                  <Link
+                    href={`/shop/${product.slug || product.id}`}
+                    className="block relative aspect-square overflow-hidden bg-black/20"
+                  >
                     {product.image ? (
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-full object-contain p-6 transition-transform duration-700 group-hover:scale-105"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-[#2a2a2a]">
@@ -186,7 +189,7 @@ export default function ShopPage() {
                         </span>
                       </div>
                     )}
-                  </div>
+                  </Link>
 
                   {/* Info */}
                   <div className="p-6 flex flex-col flex-grow">
