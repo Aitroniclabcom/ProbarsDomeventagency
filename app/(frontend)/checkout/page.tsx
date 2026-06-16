@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Navigation } from "@/components/Navigation";
@@ -20,19 +19,6 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { PaymentBrandIcons } from "@/components/checkout/PaymentBrandIcons";
-
-const StripePaymentForm = dynamic(
-  () =>
-    import("@/components/checkout/StripePaymentForm").then((m) => m.StripePaymentForm),
-  {
-    ssr: false,
-    loading: () => (
-      <p className="text-xs text-gray-500 py-3 border border-white/10 px-3 bg-white/[0.02]">
-        Loading payment…
-      </p>
-    ),
-  }
-);
 
 type FormData = {
   first_name: string;
@@ -56,12 +42,6 @@ const EMPTY_FORM: FormData = {
   country: "LV",
 };
 
-type PendingStripe = {
-  clientSecret: string;
-  orderId: number;
-  total: string;
-};
-
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
   const { t, language } = useLanguage();
@@ -72,82 +52,18 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodChoice>("stripe");
   const [bacsExpanded, setBacsExpanded] = useState(false);
   const [stripeExpanded, setStripeExpanded] = useState(true);
+  const [cardEnabled, setCardEnabled] = useState<boolean | null>(null);
   const [bankTransferDone, setBankTransferDone] = useState<{
     orderId: number;
     total: string;
   } | null>(null);
-  const [cardPaidDone, setCardPaidDone] = useState<{
-    orderId: number;
-    total: string;
-  } | null>(null);
-  const [pendingStripe, setPendingStripe] = useState<PendingStripe | null>(null);
-  const [stripePk, setStripePk] = useState<string | null>(null);
-  const [stripeConfigured, setStripeConfigured] = useState<boolean | null>(null);
-
-  async function confirmOrderPaid(orderId: number, paymentIntentId: string) {
-    try {
-      await fetch("/api/checkout/confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, paymentIntentId }),
-      });
-    } catch {
-      // Webhook may still mark the order paid; do not block the success screen.
-    }
-  }
 
   useEffect(() => {
-    fetch("/api/stripe/config")
+    fetch("/api/checkout/payment-methods")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!data) {
-          setStripeConfigured(false);
-          return;
-        }
-        setStripePk(typeof data.publishableKey === "string" ? data.publishableKey : null);
-        setStripeConfigured(Boolean(data.configured));
-      })
-      .catch(() => setStripeConfigured(false));
+      .then((data) => setCardEnabled(Boolean(data?.cardEnabled)))
+      .catch(() => setCardEnabled(false));
   }, []);
-
-  const handleStripeReturn = useCallback(async () => {
-    if (!stripePk || typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const clientSecret = params.get("payment_intent_client_secret");
-    if (!clientSecret) return;
-
-    const { loadStripe } = await import("@stripe/stripe-js");
-    const stripe = await loadStripe(stripePk);
-    if (!stripe) return;
-
-    const { paymentIntent } = await stripe.retrievePaymentIntent(clientSecret);
-    if (paymentIntent?.status !== "succeeded") return;
-
-    const pi = paymentIntent as {
-      id: string;
-      metadata?: { woo_order_id?: string };
-      amount_received?: number | null;
-      amount?: number | null;
-    };
-    const oid = pi.metadata?.woo_order_id;
-    const orderId = oid ? Number.parseInt(oid, 10) : 0;
-    const cents = pi.amount_received ?? pi.amount ?? 0;
-    const totalStr =
-      typeof cents === "number" ? (cents / 100).toFixed(2) : "0.00";
-
-    if (Number.isFinite(orderId) && orderId > 0) {
-      await confirmOrderPaid(orderId, pi.id);
-    }
-
-    clearCart();
-    setPendingStripe(null);
-    setCardPaidDone({ orderId: Number.isFinite(orderId) ? orderId : 0, total: totalStr });
-    window.history.replaceState({}, "", window.location.pathname);
-  }, [clearCart, stripePk]);
-
-  useEffect(() => {
-    void handleStripeReturn();
-  }, [handleStripeReturn]);
 
   function getItemName(item: (typeof items)[0]) {
     if (language === "lv" && item.nameLv) return item.nameLv;
@@ -157,7 +73,6 @@ export default function CheckoutPage() {
   }
 
   function onBacsHeaderClick() {
-    if (pendingStripe) return;
     if (paymentMethod === "bacs") {
       setBacsExpanded((e) => !e);
     } else {
@@ -169,7 +84,6 @@ export default function CheckoutPage() {
 
   function onStripeHeaderClick() {
     if (paymentMethod === "stripe") {
-      if (pendingStripe) return;
       setStripeExpanded((e) => !e);
     } else {
       setPaymentMethod("stripe");
@@ -181,7 +95,6 @@ export default function CheckoutPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!items.length) return;
-    if (paymentMethod === "stripe" && pendingStripe) return;
     setLoading(true);
     setError(null);
 
@@ -208,20 +121,16 @@ export default function CheckoutPage() {
       if (data.paymentMethod === "bacs") {
         clearCart();
         setBankTransferDone({ orderId: data.orderId, total: data.total });
-      } else if (data.paymentMethod === "stripe") {
-        if (!data.stripeClientSecret || !stripePk) {
-          throw new Error(
-            data.error ||
-              t("checkout.stripeUnavailable") ||
-              "Card payment could not be started. Try bank transfer or contact us."
-          );
+        return;
+      }
+
+      if (data.paymentMethod === "stripe") {
+        if (!data.paymentUrl) {
+          throw new Error(t("checkout.stripeUnavailable"));
         }
-        setPendingStripe({
-          clientSecret: data.stripeClientSecret,
-          orderId: data.orderId,
-          total: data.total,
-        });
-        setStripeExpanded(true);
+        clearCart();
+        window.location.href = data.paymentUrl;
+        return;
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong";
@@ -249,36 +158,6 @@ export default function CheckoutPage() {
           onChange={(e) => setForm((prev) => ({ ...prev, [key]: e.target.value }))}
           className="bg-white/5 border border-white/10 text-white px-4 py-3 text-sm focus:outline-none focus:border-[#C0A07B] transition-colors placeholder-gray-700"
         />
-      </div>
-    );
-  }
-
-  if (cardPaidDone) {
-    const { orderId, total } = cardPaidDone;
-    return (
-      <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
-        <Navigation />
-        <div className="container mx-auto px-6 pt-40 pb-24 flex flex-col items-center text-center max-w-lg">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
-            <CheckCircle className="w-20 h-20 text-[#C0A07B] mb-6" />
-          </motion.div>
-          <h1 className="text-3xl font-serif mb-4">{t("checkout.successCard.title")}</h1>
-          <p className="text-[#C0A07B] text-lg mb-6">
-            {t("checkout.successCard.order")} #{orderId}
-          </p>
-          <p className="text-gray-400 text-sm mb-10">{t("checkout.successCard.body")}</p>
-          <p className="text-sm text-gray-500 mb-10">
-            <span className="text-gray-500">{t("checkout.amount")}: </span>
-            <span className="text-[#C0A07B]">€{total}</span>
-          </p>
-          <button
-            onClick={() => router.push("/")}
-            className="bg-[#8C080C] hover:bg-[#a0090e] text-white px-8 py-3 text-xs tracking-widest uppercase transition-colors"
-          >
-            {t("checkout.successCard.back")}
-          </button>
-        </div>
-        <Footer />
       </div>
     );
   }
@@ -334,7 +213,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!items.length && !pendingStripe) {
+  if (!items.length) {
     return (
       <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
         <Navigation />
@@ -355,11 +234,12 @@ export default function CheckoutPage() {
   }
 
   const summaryNote =
-    paymentMethod === "bacs"
-      ? t("checkout.note")
-      : pendingStripe
-        ? t("checkout.stripeOrderCreated")
-        : t("checkout.stripeSecureHelp");
+    paymentMethod === "bacs" ? t("checkout.note") : t("checkout.stripeSecureHelp");
+
+  const submitLabel =
+    paymentMethod === "stripe"
+      ? t("checkout.placeOrderAndPay") || t("checkout.placeOrder")
+      : t("checkout.placeOrder") || "Place Order";
 
   return (
     <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans">
@@ -429,8 +309,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={onBacsHeaderClick}
-                    disabled={!!pendingStripe}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left disabled:opacity-40"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left"
                   >
                     <Building2 className="h-5 w-5 shrink-0 text-[#C0A07B]" aria-hidden />
                     <span className="flex-1 text-xs tracking-widest uppercase text-white">
@@ -476,32 +355,13 @@ export default function CheckoutPage() {
                     <div className="space-y-4 border-t border-white/10 px-4 py-4">
                       <PaymentBrandIcons className="sm:hidden" />
                       <p className="text-xs leading-relaxed text-gray-400">
-                        {pendingStripe ? t("checkout.stripeOrderCreated") : t("checkout.stripeSecureHelp")}
+                        {t("checkout.stripeSecureHelp")}
                       </p>
-                      {stripeConfigured === false && (
+                      {cardEnabled === false && (
                         <p className="text-xs text-[#8C080C] border border-[#8C080C]/30 bg-[#8C080C]/10 px-3 py-2">
                           {t("checkout.stripeUnavailable")}
                         </p>
                       )}
-                      {pendingStripe && stripePk ? (
-                        <StripePaymentForm
-                          clientSecret={pendingStripe.clientSecret}
-                          publishableKey={stripePk}
-                          orderTotalLabel={`€${pendingStripe.total}`}
-                          payLabel={t("checkout.proceedToPayment")}
-                          processingLabel={t("checkout.processing")}
-                          returnPath="/checkout"
-                          onSuccess={async (paymentIntentId) => {
-                            await confirmOrderPaid(pendingStripe.orderId, paymentIntentId);
-                            clearCart();
-                            setCardPaidDone({
-                              orderId: pendingStripe.orderId,
-                              total: pendingStripe.total,
-                            });
-                            setPendingStripe(null);
-                          }}
-                        />
-                      ) : null}
                     </div>
                   )}
                 </div>
@@ -516,11 +376,7 @@ export default function CheckoutPage() {
 
             <button
               type="submit"
-              disabled={
-                loading ||
-                (paymentMethod === "stripe" && !!pendingStripe) ||
-                (paymentMethod === "stripe" && stripeConfigured === false)
-              }
+              disabled={loading || (paymentMethod === "stripe" && cardEnabled === false)}
               className="mt-2 bg-[#8C080C] hover:bg-[#a0090e] text-white py-4 text-xs tracking-widest uppercase transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
@@ -529,7 +385,7 @@ export default function CheckoutPage() {
                   {t("checkout.processing") || "Processing…"}
                 </>
               ) : (
-                t("checkout.placeOrder") || "Place Order"
+                submitLabel
               )}
             </button>
           </form>

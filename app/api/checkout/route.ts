@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWooCommerceBaseUrl } from "@/lib/woocommerce/config";
 import { wooRestOrdersCreateUrl } from "@/lib/woocommerce/order-rest";
-import { getStripe } from "@/lib/stripe/server";
+import { resolveWooStripeGatewayId } from "@/lib/woocommerce/payment-gateways";
 
-const WC_PAYMENT: Record<string, string> = {
+const WC_PAYMENT_TITLE: Record<string, string> = {
   bacs: "Direct bank transfer",
   stripe: "Credit / Debit Card",
 };
-
-function toStripeMinorUnits(totalStr: string): number | null {
-  const n = Number.parseFloat(String(totalStr).replace(",", "."));
-  if (!Number.isFinite(n) || n <= 0) return null;
-  return Math.round(n * 100);
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,18 +40,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
     }
 
+    let wooPaymentMethod = paymentMethod;
     if (paymentMethod === "stripe") {
-      const stripe = getStripe();
-      const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
-      if (!stripe || !publishableKey) {
+      const gatewayId = await resolveWooStripeGatewayId(consumerKey, consumerSecret);
+      if (!gatewayId) {
         return NextResponse.json(
-          {
-            error:
-              "Card payments are not configured. Set STRIPE_SECRET_KEY and NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY on the server.",
-          },
+          { error: "Card payments are not enabled in WooCommerce. Enable Stripe in the store admin." },
           { status: 503 }
         );
       }
+      wooPaymentMethod = gatewayId;
     }
 
     let country = (billing.country || "LV").toString();
@@ -71,8 +63,8 @@ export async function POST(req: NextRequest) {
     }));
 
     const payload = {
-      payment_method: paymentMethod,
-      payment_method_title: WC_PAYMENT[paymentMethod] ?? paymentMethod,
+      payment_method: wooPaymentMethod,
+      payment_method_title: WC_PAYMENT_TITLE[paymentMethod] ?? wooPaymentMethod,
       set_paid: false,
       billing: {
         first_name: billing.first_name || "",
@@ -93,14 +85,11 @@ export async function POST(req: NextRequest) {
       line_items,
     };
 
-    // Query-string auth: many PHP / reverse-proxy setups strip Authorization: Basic.
     const endpoint = wooRestOrdersCreateUrl(consumerKey, consumerSecret);
 
     const res = await fetch(endpoint, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       cache: "no-store",
     });
@@ -112,7 +101,6 @@ export async function POST(req: NextRequest) {
       id?: number;
       order_key?: string;
       total?: string;
-      currency?: string;
       message?: string;
       code?: string;
     } = {};
@@ -120,19 +108,12 @@ export async function POST(req: NextRequest) {
       order = JSON.parse(bodyText) as typeof order;
     } catch {
       const preview = bodyText.slice(0, 280).replace(/\s+/g, " ");
-      console.error(
-        "[WooCommerce] Non-JSON response",
-        res.status,
-        preview || "(empty body)"
-      );
+      console.error("[WooCommerce] Non-JSON response", res.status, preview || "(empty body)");
       const looksHtml = /<!DOCTYPE|<html[\s>]/i.test(bodyText);
       const hint = looksHtml
         ? "Received HTML instead of JSON — check WOOCOMMERCE_URL (include /shop if WordPress is in a subdirectory), permalinks, and that the REST API is not blocked."
         : "WooCommerce did not return JSON — check store URL, SSL, and API credentials (Read/Write).";
-      return NextResponse.json(
-        { error: `${hint} (HTTP ${res.status})` },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: `${hint} (HTTP ${res.status})` }, { status: 502 });
     }
 
     if (!res.ok) {
@@ -153,63 +134,11 @@ export async function POST(req: NextRequest) {
     const paymentUrl = `${apiBase}/checkout/order-pay/${orderId}/?pay_for_order=true&key=${encodeURIComponent(orderKey)}`;
     const total = order.total ?? "0.00";
 
-    let stripeClientSecret: string | undefined;
-    let stripeError: string | undefined;
-    if (paymentMethod === "stripe") {
-      const stripe = getStripe();
-      const minor = toStripeMinorUnits(total);
-      const currency = (order.currency || "EUR").toLowerCase();
-
-      if (!stripe) {
-        stripeError = "Stripe secret key is not configured";
-      } else if (minor == null) {
-        stripeError = "Invalid order total for card payment";
-      } else if (minor < 50) {
-        stripeError = "Order total is below the minimum for card payments (€0.50)";
-      } else {
-        try {
-          const pi = await stripe.paymentIntents.create({
-            amount: minor,
-            currency,
-            automatic_payment_methods: { enabled: true },
-            receipt_email: billing.email,
-            metadata: {
-              woo_order_id: String(orderId),
-              woo_order_key: String(orderKey),
-            },
-          });
-          stripeClientSecret = pi.client_secret ?? undefined;
-          if (!stripeClientSecret) {
-            stripeError = "Stripe did not return a payment session";
-          }
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : "Failed to start card payment";
-          console.error("[Stripe] payment_intents.create failed:", e);
-          stripeError = msg;
-        }
-      }
-    }
-
-    if (paymentMethod === "stripe" && !stripeClientSecret) {
-      return NextResponse.json(
-        {
-          error:
-            stripeError ||
-            "Could not start card payment. Check Stripe API keys or try bank transfer.",
-          orderId,
-          total,
-          paymentMethod,
-        },
-        { status: 502 }
-      );
-    }
-
     return NextResponse.json({
       orderId,
       total,
       paymentMethod,
       paymentUrl,
-      ...(stripeClientSecret ? { stripeClientSecret } : {}),
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to create order";

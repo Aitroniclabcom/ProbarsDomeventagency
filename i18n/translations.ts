@@ -60,11 +60,12 @@ export const translations = {
         "Saņemsiet rekvizītus e-pastā pēc pasūtījuma. Maksājums notiek ar pārskaitījumu uz norādīto kontu.",
       cardPayment: "Maksāt ar karti (Stripe)",
       stripeSecureHelp:
-        "Šeit varēsiet norēķināties ar bankas karti, Apple Pay vai Google Pay (ja ieslēgts jūsu ierīcē un pārlūkā). Vispirms apstipriniet pasūtījumu — tad parādīsies droša maksājuma forma.",
+        "Pēc pasūtījuma apstiprināšanas tiksiet novirzīti uz drošu WooCommerce maksājumu lapu (shop.domeventagency.com), kur varēsiet norēķināties ar karti, Apple Pay vai Google Pay.",
       stripeOrderCreated:
         "Pasūtījums izveidots. Aizpildiet maksājumu zemāk — karte vai maks, kas piedāvāts jūsu ierīcē.",
       stripeUnavailable:
-        "Maksājums ar karti šobrīd nav pieejams. Izvēlieties bankas pārskaitījumu vai sazinieties ar mums.",
+        "Maksājums ar karti WooCommerce veikalā nav ieslēgts. Izvēlieties bankas pārskaitījumu vai sazinieties ar mums.",
+      placeOrderAndPay: "APSTIPRINĀT UN MAKSĀT",
       bankDetails: "Bankas rekvizīti",
       proceedToPayment: "Turpināt uz maksājumu",
       accountHolder: "Konta nosaukums",
@@ -327,11 +328,12 @@ export const translations = {
         "После оформления заказа мы отправим реквизиты на электронную почту. Оплата банковским переводом.",
       cardPayment: "Картой (Stripe)",
       stripeSecureHelp:
-        "Здесь можно оплатить картой, Apple Pay или Google Pay (если включено на устройстве и в браузере). Сначала подтвердите заказ — затем появится форма оплаты.",
+        "После подтверждения заказа вы перейдёте на защищённую страницу оплаты WooCommerce (shop.domeventagency.com), где можно оплатить картой, Apple Pay или Google Pay.",
       stripeOrderCreated:
         "Заказ создан. Заполните оплату ниже — карта или кошелёк, доступный на вашем устройстве.",
       stripeUnavailable:
-        "Оплата картой сейчас недоступна. Выберите банковский перевод или свяжитесь с нами.",
+        "Оплата картой в WooCommerce не включена. Выберите банковский перевод или свяжитесь с нами.",
+      placeOrderAndPay: "ПОДТВЕРДИТЬ И ОПЛАТИТЬ",
       bankDetails: "Банковские реквизиты",
       proceedToPayment: "Перейти к оплате",
       accountHolder: "Получатель",
@@ -594,11 +596,12 @@ export const translations = {
         "After you place the order, we email you the transfer details. You pay via bank transfer.",
       cardPayment: "Card (Stripe)",
       stripeSecureHelp:
-        "You can pay by card, Apple Pay, or Google Pay (when available on your device and browser). Confirm the order first — then the secure payment form appears here.",
+        "After you confirm the order, you will be redirected to the secure WooCommerce payment page (shop.domeventagency.com) to pay by card, Apple Pay, or Google Pay.",
       stripeOrderCreated:
         "Order created. Complete payment below — card or wallet offered for your device.",
       stripeUnavailable:
-        "Card payment is not available right now. Choose bank transfer or contact us.",
+        "Card payment is not enabled in WooCommerce. Choose bank transfer or contact us.",
+      placeOrderAndPay: "CONFIRM & PAY",
       bankDetails: "Bank details",
       proceedToPayment: "Proceed to payment",
       accountHolder: "Account name",
