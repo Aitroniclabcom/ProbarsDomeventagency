@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getWooCommerceBaseUrl } from "@/lib/woocommerce/config";
 import { wooRestOrdersCreateUrl } from "@/lib/woocommerce/order-rest";
 import { resolveWooStripeGatewayId } from "@/lib/woocommerce/payment-gateways";
+import { checkoutThankYouUrl } from "@/lib/site-url";
+
+const HEADLESS_RETURN_META = "_headless_return_url";
 
 const WC_PAYMENT_TITLE: Record<string, string> = {
   bacs: "Direct bank transfer",
@@ -62,6 +65,15 @@ export async function POST(req: NextRequest) {
       quantity: Math.max(1, Number(item.quantity) || 1),
     }));
 
+    let thankYouBase: string | undefined;
+    if (paymentMethod === "stripe") {
+      try {
+        thankYouBase = checkoutThankYouUrl();
+      } catch (e) {
+        console.warn("[checkout] NEXT_PUBLIC_SITE_URL missing — post-payment redirect may not work:", e);
+      }
+    }
+
     const payload = {
       payment_method: wooPaymentMethod,
       payment_method_title: WC_PAYMENT_TITLE[paymentMethod] ?? wooPaymentMethod,
@@ -83,6 +95,9 @@ export async function POST(req: NextRequest) {
         country,
       },
       line_items,
+      ...(thankYouBase
+        ? { meta_data: [{ key: HEADLESS_RETURN_META, value: thankYouBase }] }
+        : {}),
     };
 
     const endpoint = wooRestOrdersCreateUrl(consumerKey, consumerSecret);
