@@ -19,7 +19,7 @@ export default function ShopProductPage() {
   const slug = typeof slugParam === "string" ? slugParam : Array.isArray(slugParam) ? slugParam[0] : "";
 
   const { addToCart } = useCart();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null);
@@ -94,6 +94,16 @@ export default function ShopProductPage() {
       ? [product.image]
       : [];
   const mainImage = selectedVariation?.image ?? gallery[selectedImage] ?? product?.image ?? null;
+
+  // Localized name/descriptions: WooCommerce holds the LV defaults; EN/RU come from
+  // ACF meta (name_en, short_description_ru, …), falling back to the default when empty.
+  const pickLocalized = (base: string, key: string) =>
+    language !== "lv" && product?.meta?.[`${key}_${language}`]
+      ? product.meta[`${key}_${language}`]
+      : base;
+  const displayName = product ? pickLocalized(product.name, "name") : "";
+  const displayShort = product ? pickLocalized(product.shortDescription, "short_description") : "";
+  const displayDesc = product ? pickLocalized(product.description, "description") : "";
 
   useEffect(() => {
     setSelectedImage(0);
@@ -198,11 +208,11 @@ export default function ShopProductPage() {
                   {product.categoryNames[0]}
                 </p>
               )}
-              <h1 className="text-3xl md:text-4xl font-serif mb-6 text-white">{product.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-serif mb-6 text-white">{displayName}</h1>
               <div
                 className="product-description mb-8"
                 dangerouslySetInnerHTML={{
-                  __html: product.description || product.shortDescription || "",
+                  __html: displayDesc || displayShort || "",
                 }}
               />
 

@@ -67,6 +67,19 @@ export async function fetchProductBySlug(slug: string): Promise<FrontendProduct 
     if (v3) mapped = mapWCProductToFrontend(v3);
   }
   if (!mapped) return null;
+  // The Store API omits product meta_data, so localized fields (ACF: name_en,
+  // description_ru, …) are missing on that path. Pull meta via REST v3 and merge.
+  if (Object.keys(mapped.meta).length === 0) {
+    try {
+      const v3 = await fetchProductBySlugViaWooRestV3(slug);
+      if (v3) {
+        const v3Meta = mapWCProductToFrontend(v3).meta;
+        if (Object.keys(v3Meta).length) mapped = { ...mapped, meta: v3Meta };
+      }
+    } catch (e) {
+      console.error(`[WooCommerce] meta fetch failed for ${slug}:`, e);
+    }
+  }
   if (mapped.type === "variable") {
     mapped = await attachVariations(mapped);
   }
