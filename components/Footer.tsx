@@ -48,7 +48,7 @@ export function Footer() {
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-center mb-8">
             <Image src="/assets/eu-fund-logo.png" alt="ES Atveseļošanās fonds" width={120} height={48} className="h-12 w-auto object-contain" />
             <p className="text-xs text-gray-500 font-light leading-relaxed max-w-3xl">
-              SIA Probar reģ.nr 40203160448 Atveseļošanās fonda ietvaros veic ieguldījumu komercdarbības procesu uzlabošanā.
+              SIA PROBAR reģ.nr 40203160448 Atveseļošanās fonda ietvaros veic ieguldījumu komercdarbības procesu uzlabošanā.
               Atbalstāmā darbība: jaunu digitālo risinājumu izstrāde.
               Risinājums: e-komercijas risinājums{" "}
               <a href="http://www.domeventagency.com/" target="_blank" rel="noopener noreferrer" className="text-[#C0A07B] hover:underline">

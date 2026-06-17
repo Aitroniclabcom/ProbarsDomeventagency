@@ -19,7 +19,7 @@ export default function ShopProductPage() {
   const slug = typeof slugParam === "string" ? slugParam : Array.isArray(slugParam) ? slugParam[0] : "";
 
   const { addToCart } = useCart();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null);
@@ -95,6 +95,16 @@ export default function ShopProductPage() {
       : [];
   const mainImage = selectedVariation?.image ?? gallery[selectedImage] ?? product?.image ?? null;
 
+  // Localized name/descriptions: WooCommerce holds the LV defaults; EN/RU come from
+  // ACF meta (name_en, short_description_ru, …), falling back to the default when empty.
+  const pickLocalized = (base: string, key: string) =>
+    language !== "lv" && product?.meta?.[`${key}_${language}`]
+      ? product.meta[`${key}_${language}`]
+      : base;
+  const displayName = product ? pickLocalized(product.name, "name") : "";
+  const displayShort = product ? pickLocalized(product.shortDescription, "short_description") : "";
+  const displayDesc = product ? pickLocalized(product.description, "description") : "";
+
   useEffect(() => {
     setSelectedImage(0);
     setSelectedVariationId(null);
@@ -111,7 +121,7 @@ export default function ShopProductPage() {
             href="/shop"
             className="inline-flex items-center gap-2 text-xs tracking-widest uppercase text-gray-400 hover:text-[#C0A07B] transition-colors border border-white/10 px-4 py-2 hover:border-[#C0A07B]/50"
           >
-            Back to shop
+            {t("shop.backToShop") || "Back to shop"}
           </Link>
         </div>
       </div>
@@ -137,7 +147,7 @@ export default function ShopProductPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid md:grid-cols-2 gap-10 lg:gap-16 max-w-6xl mx-auto"
+            className="grid md:grid-cols-[1.15fr_1fr] gap-8 lg:gap-14 max-w-7xl mx-auto"
           >
             <div className="flex flex-col gap-4">
               <div className="relative aspect-square overflow-hidden bg-black/20 border border-white/5">
@@ -145,7 +155,7 @@ export default function ShopProductPage() {
                   <img
                     src={mainImage}
                     alt={product.name}
-                    className="w-full h-full object-contain p-8"
+                    className="w-full h-full object-contain p-3"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-[#2a2a2a]">
@@ -198,11 +208,11 @@ export default function ShopProductPage() {
                   {product.categoryNames[0]}
                 </p>
               )}
-              <h1 className="text-3xl md:text-4xl font-serif mb-6 text-white">{product.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-serif mb-6 text-white">{displayName}</h1>
               <div
-                className="text-sm text-gray-500 mb-8 font-light leading-relaxed"
+                className="product-description mb-8"
                 dangerouslySetInnerHTML={{
-                  __html: product.description || product.shortDescription || "",
+                  __html: displayDesc || displayShort || "",
                 }}
               />
 
@@ -238,7 +248,7 @@ export default function ShopProductPage() {
               )}
 
               <div className="flex items-center gap-4 mb-8">
-                <span className="text-xs tracking-widest uppercase text-gray-500">Qty</span>
+                <span className="text-xs tracking-widest uppercase text-gray-500">{t("shop.qty") || "Qty"}</span>
                 <div className="flex items-center border border-white/10 bg-white/5">
                   <button
                     type="button"

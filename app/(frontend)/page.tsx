@@ -283,7 +283,7 @@ export default function HomePage() {
           <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{t("certificates.title") || "SERTIFIKĀTI"}</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {["/assets/certificates/certificate1.png", "/assets/certificates/certificate2.jpg", "/assets/certificates/certificate3.png"].map((cert, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-[#222] p-4 border border-white/5">
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-white p-4">
                 <img src={cert} alt={`Certificate ${i + 1}`} className="w-full h-auto object-contain" />
               </motion.div>
             ))}
@@ -295,10 +295,11 @@ export default function HomePage() {
       <section className="py-24 bg-[#111]">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{t("partners.title") || "PARTNERI"}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-stretch">
             {partners.map((partner, i) => (
-              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex items-center justify-center p-4 opacity-60 hover:opacity-100 transition-opacity">
-                <img src={partner.logo} alt={partner.name} className="max-h-16 w-auto object-contain filter invert" />
+              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex flex-col items-center justify-center gap-4 bg-white p-6">
+                <img src={partner.logo} alt={partner.name} className="max-h-24 w-auto object-contain" />
+                <span className="text-[#222222] text-xs tracking-wide text-center font-medium">{partner.name}</span>
               </motion.div>
             ))}
           </div>

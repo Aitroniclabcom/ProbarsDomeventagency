@@ -23,8 +23,8 @@ export const translations = {
       notFound: "Ieraksts nav atrasts"
     },
     shop: {
-      title: "MERČENDAIZINGS",
-      subtitle: "Stils, kas runā bez vārdiem. Iegādājies mūsu ekskluzīvo atribūtiku un dāvanu kartes.",
+      title: "VEIKALS",
+      subtitle: "Mūsu produkti, dāvanu kartes un pakalpojumi vienuviet.",
       add: "PIEVIENOT GROZAM",
       empty: "Pašlaik nav pieejamu produktu",
       all: "VISI",
@@ -32,6 +32,8 @@ export const translations = {
       from: "No",
       outOfStock: "Nav noliktavā",
       selectOption: "Izvēlēties opciju",
+      backToShop: "Atpakaļ uz veikalu",
+      qty: "Daudzums",
       products: {
         tshirt: { name: "D.O.M. T-Krekls", desc: "Augstas kvalitātes kokvilnas krekls ar minimālistisku logo dizainu." },
         hoodie: { name: "D.O.M. Hūdijs", desc: "Premium klases hūdijs vēsajiem vasaras vakariem." },
@@ -309,8 +311,8 @@ export const translations = {
       notFound: "Запись не найдена"
     },
     shop: {
-      title: "МЕРЧАНДАЙЗИНГ",
-      subtitle: "Стиль, который говорит без слов. Приобретайте нашу эксклюзивную атрибутику и подарочные карты.",
+      title: "МАГАЗИН",
+      subtitle: "Наши продукты, подарочные карты и услуги в одном месте.",
       add: "ДОБАВИТЬ В КОРЗИНУ",
       empty: "В настоящее время нет доступных продуктов",
       all: "ВСЕ",
@@ -318,6 +320,8 @@ export const translations = {
       from: "от",
       outOfStock: "Нет в наличии",
       selectOption: "Выберите вариант",
+      backToShop: "Назад в магазин",
+      qty: "Кол-во",
       products: {
         tshirt: { name: "��утболка D.O.M.", desc: "Футболка из высококачественного хлопка с минималистичным логотипом." },
         hoodie: { name: "Худи D.O.M.", desc: "Худи премиум-класса для прохладных летних вечеров." },
@@ -595,8 +599,8 @@ export const translations = {
       notFound: "Post not found"
     },
     shop: {
-      title: "MERCHANDISE",
-      subtitle: "Style that speaks without words. Purchase our exclusive attributes and gift cards.",
+      title: "SHOP",
+      subtitle: "Our products, gift cards and services in one place.",
       add: "ADD TO CART",
       empty: "No products currently available",
       all: "ALL",
@@ -604,6 +608,8 @@ export const translations = {
       from: "From",
       outOfStock: "Out of stock",
       selectOption: "Select option",
+      backToShop: "Back to shop",
+      qty: "Qty",
       products: {
         tshirt: { name: "D.O.M. T-Shirt", desc: "High-quality cotton t-shirt with minimalist logo design." },
         hoodie: { name: "D.O.M. Hoodie", desc: "Premium class hoodie for cool summer evenings." },
