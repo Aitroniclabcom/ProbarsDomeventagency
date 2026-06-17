@@ -29,6 +29,10 @@ export type WCStoreProduct = {
   categories?: Array<{ id: number; name: string; slug: string }>;
   meta_data?: Array<{ key: string; value: unknown }> | unknown;
   sku?: string;
+  /** "simple" | "variable" | … (WooCommerce product type) */
+  type?: string;
+  /** Variable products: Store API returns variation refs (ids + attribute pairs) */
+  variations?: Array<{ id: number; attributes?: Array<{ name?: string; value?: string }> }>;
 };
 
 export type WCStoreCartItem = {
@@ -98,6 +102,19 @@ export type WCStoreCart = {
 
 // ─── Frontend Model Types ──────────────────────────────────────────────────
 
+/** A single selectable option of a variable product (e.g. a gift-card nominal). */
+export type FrontendVariation = {
+  id: string;
+  /** Human label built from the variation's attribute value(s), e.g. "50 €". */
+  label: string;
+  attributes: Record<string, string>;
+  price: number;
+  regularPrice: number;
+  salePrice: number | null;
+  image: string | null;
+  stockStatus: "instock" | "outofstock" | "onbackorder";
+};
+
 export type FrontendProduct = {
   id: string;
   slug: string;
@@ -117,6 +134,12 @@ export type FrontendProduct = {
   categoryIds: number[];
   categoryNames: string[];
   meta: Record<string, string>;
+  /** "simple" (default) or "variable". */
+  type: "simple" | "variable";
+  /** For variable products: min/max across variations. null for simple. */
+  priceRange: { min: number; max: number } | null;
+  /** Selectable options for variable products; empty for simple. */
+  variations: FrontendVariation[];
 };
 
 export type FrontendCartItem = {
@@ -233,6 +256,54 @@ export function mapWCProductToFrontend(product: WCStoreProduct): FrontendProduct
     categoryIds: product.categories?.map((cat) => cat.id) || [],
     categoryNames: product.categories?.map((cat) => String(cat.name ?? "")) || [],
     meta: metaToRecord(metaData),
+    type: product.type === "variable" ? "variable" : "simple",
+    // priceRange + variations are filled in by the data layer (store-api) for variable products.
+    priceRange: null,
+    variations: [],
+  };
+}
+
+/** Map a WooCommerce REST v3 product variation to the frontend model. */
+export function mapWCVariationToFrontend(raw: Record<string, unknown>): FrontendVariation {
+  const attrsRaw = Array.isArray(raw.attributes)
+    ? (raw.attributes as Array<{ name?: string; option?: string }>)
+    : [];
+  const attributes: Record<string, string> = {};
+  for (const a of attrsRaw) {
+    if (a && a.name) attributes[String(a.name)] = String(a.option ?? "");
+  }
+  const label = attrsRaw
+    .map((a) => String(a?.option ?? "").trim())
+    .filter(Boolean)
+    .join(" / ");
+
+  const regularPrice = parseFloat(String(raw.regular_price ?? raw.price ?? "0")) || 0;
+  const price = parseFloat(String(raw.price ?? raw.regular_price ?? "0")) || 0;
+  const saleRaw =
+    raw.sale_price != null && String(raw.sale_price).trim() !== ""
+      ? parseFloat(String(raw.sale_price))
+      : null;
+  const salePrice = saleRaw != null && saleRaw > 0 && saleRaw < regularPrice ? saleRaw : null;
+
+  const imgSrc =
+    raw.image && typeof raw.image === "object"
+      ? String((raw.image as { src?: string }).src ?? "")
+      : "";
+
+  let stockStatus: FrontendVariation["stockStatus"] = "instock";
+  if (raw.stock_status === "outofstock" || raw.stock_status === "onbackorder") {
+    stockStatus = raw.stock_status;
+  }
+
+  return {
+    id: String(raw.id ?? ""),
+    label,
+    attributes,
+    price,
+    regularPrice,
+    salePrice,
+    image: imgSrc || null,
+    stockStatus,
   };
 }
 

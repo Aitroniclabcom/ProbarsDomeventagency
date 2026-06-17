@@ -22,6 +22,7 @@ export default function ShopProductPage() {
   const { t } = useLanguage();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null);
 
   const { data: product, isLoading, isError } = useQuery<FrontendProduct | null>({
     queryKey: ["product", slug],
@@ -36,7 +37,14 @@ export default function ShopProductPage() {
     staleTime: 60_000,
   });
 
+  const isVariable = product?.type === "variable";
+  const selectedVariation =
+    isVariable && product
+      ? product.variations.find((v) => v.id === selectedVariationId) ?? null
+      : null;
+
   function buildCartProduct(p: FrontendProduct): Product {
+    const v = selectedVariation;
     return {
       id: p.id,
       name: p.name,
@@ -47,33 +55,49 @@ export default function ShopProductPage() {
       descriptionLv: null,
       descriptionRu: null,
       descriptionEn: null,
-      price: p.price,
-      discountPrice: p.salePrice,
-      image: p.image,
+      price: v ? v.price : p.price,
+      discountPrice: v ? v.salePrice : p.salePrice,
+      image: v?.image ?? p.image,
       isDigital: false,
+      variationId: v ? v.id : null,
+      variationLabel: v ? v.label : null,
     };
   }
 
   function handleAddToCart(p: FrontendProduct) {
+    if (isVariable && !selectedVariation) return;
     const cartProduct = buildCartProduct(p);
     for (let i = 0; i < quantity; i++) {
       addToCart(cartProduct);
     }
   }
 
-  const outOfStock = product?.stockStatus === "outofstock";
-  const isOnSale = product ? product.isOnSale && product.salePrice !== null : false;
-  const displayPrice = product && isOnSale ? product.salePrice! : product?.price ?? 0;
+  const variationOutOfStock = selectedVariation?.stockStatus === "outofstock";
+  const outOfStock = product?.stockStatus === "outofstock" || variationOutOfStock;
+  const needsVariation = Boolean(isVariable && !selectedVariation);
+
+  const isOnSale = selectedVariation
+    ? selectedVariation.salePrice !== null
+    : product
+      ? product.isOnSale && product.salePrice !== null
+      : false;
+  const baseRegularPrice = selectedVariation ? selectedVariation.regularPrice : product?.regularPrice ?? 0;
+  const displayPrice = selectedVariation
+    ? selectedVariation.salePrice ?? selectedVariation.price
+    : isOnSale
+      ? product!.salePrice!
+      : product?.price ?? 0;
 
   const gallery = product?.gallery?.length
     ? product.gallery
     : product?.image
       ? [product.image]
       : [];
-  const mainImage = gallery[selectedImage] ?? product?.image ?? null;
+  const mainImage = selectedVariation?.image ?? gallery[selectedImage] ?? product?.image ?? null;
 
   useEffect(() => {
     setSelectedImage(0);
+    setSelectedVariationId(null);
   }, [product?.id]);
 
   return (
@@ -132,11 +156,11 @@ export default function ShopProductPage() {
                 <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
                   {isOnSale && (
                     <span className="bg-white/10 text-gray-400 text-xs px-2 py-1 font-medium tracking-widest line-through">
-                      €{product.regularPrice.toFixed(2)}
+                      €{baseRegularPrice.toFixed(2)}
                     </span>
                   )}
                   <span className="bg-[#8C080C] text-white text-xs px-2 py-1 font-medium tracking-widest">
-                    €{displayPrice.toFixed(2)}
+                    {needsVariation ? `${t("shop.from") || "No"} ` : ""}€{displayPrice.toFixed(2)}
                   </span>
                 </div>
 
@@ -182,6 +206,37 @@ export default function ShopProductPage() {
                 }}
               />
 
+              {isVariable && product.variations.length > 0 && (
+                <div className="mb-8">
+                  <span className="text-xs tracking-widest uppercase text-gray-500 block mb-3">
+                    {product.variations[0]?.attributes &&
+                      Object.keys(product.variations[0].attributes)[0]}
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {product.variations.map((v) => {
+                      const disabled = v.stockStatus === "outofstock";
+                      const active = v.id === selectedVariationId;
+                      return (
+                        <button
+                          key={v.id}
+                          type="button"
+                          disabled={disabled}
+                          aria-pressed={active}
+                          onClick={() => setSelectedVariationId(v.id)}
+                          className={`min-w-[64px] px-4 py-2 text-sm tracking-wide border transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                            active
+                              ? "border-[#C0A07B] bg-[#C0A07B] text-[#222222]"
+                              : "border-white/15 bg-white/5 text-white hover:border-[#C0A07B]/60"
+                          }`}
+                        >
+                          {v.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center gap-4 mb-8">
                 <span className="text-xs tracking-widest uppercase text-gray-500">Qty</span>
                 <div className="flex items-center border border-white/10 bg-white/5">
@@ -209,10 +264,11 @@ export default function ShopProductPage() {
               <button
                 type="button"
                 onClick={() => handleAddToCart(product)}
-                disabled={outOfStock}
+                disabled={outOfStock || needsVariation}
                 className="w-full md:w-auto min-w-[240px] bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 px-8 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <ShoppingBag size={14} /> {t("shop.add")}
+                <ShoppingBag size={14} />{" "}
+                {needsVariation ? t("shop.selectOption") || "Izvēlieties opciju" : t("shop.add")}
               </button>
             </div>
           </motion.div>

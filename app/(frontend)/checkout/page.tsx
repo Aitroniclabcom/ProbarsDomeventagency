@@ -108,6 +108,7 @@ export default function CheckoutPage() {
           lineItems: items.map((item) => ({
             id: Number(item.id),
             quantity: item.quantity,
+            ...(item.variationId ? { variationId: Number(item.variationId) } : {}),
           })),
         }),
       });

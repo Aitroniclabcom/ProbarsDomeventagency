@@ -17,15 +17,23 @@ export type Product = {
   isDigital?: boolean | null;
   digitalFileUrl?: string | null;
   digitalDownloadLink?: string | null;
+  /** Variable products: the selected variation's id + human label (e.g. "50 €"). */
+  variationId?: string | null;
+  variationLabel?: string | null;
 };
 
 type CartItem = Product & { quantity: number };
 
+/** Unique cart-line key: distinguishes variations of the same product. */
+export function getLineId(item: Pick<Product, "id" | "variationId">): string {
+  return item.variationId ? `${item.id}:${item.variationId}` : item.id;
+}
+
 type CartContextType = {
   items: CartItem[];
   addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (lineId: string) => void;
+  updateQuantity: (lineId: string, quantity: number) => void;
   clearCart: () => void;
   total: number;
   itemCount: number;
@@ -49,11 +57,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   const addToCart = (product: Product) => {
+    const lineId = getLineId(product);
     setItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
+      const existing = prev.find((item) => getLineId(item) === lineId);
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          getLineId(item) === lineId ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
       return [...prev, { ...product, quantity: 1 }];
@@ -61,14 +70,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsCartOpen(true);
   };
 
-  const removeFromCart = (productId: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== productId));
+  const removeFromCart = (lineId: string) => {
+    setItems((prev) => prev.filter((item) => getLineId(item) !== lineId));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (lineId: string, quantity: number) => {
     if (quantity < 1) return;
     setItems((prev) =>
-      prev.map((item) => (item.id === productId ? { ...item, quantity } : item))
+      prev.map((item) => (getLineId(item) === lineId ? { ...item, quantity } : item))
     );
   };
 

@@ -27,6 +27,11 @@ export const translations = {
       subtitle: "Stils, kas runā bez vārdiem. Iegādājies mūsu ekskluzīvo atribūtiku un dāvanu kartes.",
       add: "PIEVIENOT GROZAM",
       empty: "Pašlaik nav pieejamu produktu",
+      all: "VISI",
+      search: "Meklēt…",
+      from: "No",
+      outOfStock: "Nav noliktavā",
+      selectOption: "Izvēlēties opciju",
       products: {
         tshirt: { name: "D.O.M. T-Krekls", desc: "Augstas kvalitātes kokvilnas krekls ar minimālistisku logo dizainu." },
         hoodie: { name: "D.O.M. Hūdijs", desc: "Premium klases hūdijs vēsajiem vasaras vakariem." },
@@ -265,6 +270,9 @@ export const translations = {
         vladislavs: { role: "Miksologs", bio: "Pieredzējis miksologs un ražošanas vadītājs ar vairāk nekā 8 gadu pieredzi.", fullBio: "Vladislavs Saveljevs ir pieredzējis miksologs un ražošanas vadītājs ar vairāk nekā 8 gadu pieredzi augstas noslodzes bāros Latvijā un Vācijā. Viņš apvieno radošu pieeju dzērieniem ar precīzu kvalitātes kontroli un izcilu viesu apkalpošanu." }
       }
     },
+    certificates: {
+      title: "SERTIFIKĀTI"
+    },
     partners: {
       title: "SADARBĪBAS PARTNERI"
     },
@@ -305,6 +313,11 @@ export const translations = {
       subtitle: "Стиль, который говорит без слов. Приобретайте нашу эксклюзивную атрибутику и подарочные карты.",
       add: "ДОБАВИТЬ В КОРЗИНУ",
       empty: "В настоящее время нет доступных продуктов",
+      all: "ВСЕ",
+      search: "Поиск…",
+      from: "от",
+      outOfStock: "Нет в наличии",
+      selectOption: "Выберите вариант",
       products: {
         tshirt: { name: "��утболка D.O.M.", desc: "Футболка из высококачественного хлопка с минималистичным логотипом." },
         hoodie: { name: "Худи D.O.M.", desc: "Худи премиум-класса для прохладных летних вечеров." },
@@ -543,6 +556,9 @@ export const translations = {
         vladislavs: { role: "Миксолог", bio: "Опытный миксолог и руководитель производства с более чем 8-летним опытом.", fullBio: "Владислав Савельев — опытный миксолог и руководитель производства с более чем 8-летним опытом в барах с высокой нагрузкой в Латвии и Германии. Он объединяет творческий подход к напиткам с точным контролем качества и отличным обслуживанием гостей." }
       }
     },
+    certificates: {
+      title: "СЕРТИФИКАТЫ"
+    },
     partners: {
       title: "ПАРТНЕРЫ ПО СОТРУДНИЧЕСТВУ"
     },
@@ -583,6 +599,11 @@ export const translations = {
       subtitle: "Style that speaks without words. Purchase our exclusive attributes and gift cards.",
       add: "ADD TO CART",
       empty: "No products currently available",
+      all: "ALL",
+      search: "Search…",
+      from: "From",
+      outOfStock: "Out of stock",
+      selectOption: "Select option",
       products: {
         tshirt: { name: "D.O.M. T-Shirt", desc: "High-quality cotton t-shirt with minimalist logo design." },
         hoodie: { name: "D.O.M. Hoodie", desc: "Premium class hoodie for cool summer evenings." },
@@ -820,6 +841,9 @@ export const translations = {
         laura: { role: "Content Creator", bio: "I create advertising and visual content, participate in developing ideas, and I like being in the creative process.", fullBio: "I create advertising and visual content, participate in developing ideas, and I like being in the creative process - from communication to organization. For me, content is about interaction between people, ideas, and brands. People are my main value." },
         vladislavs: { role: "Mixologist", bio: "Experienced mixologist and production manager with over 8 years of experience.", fullBio: "Vladislavs Saveljevs is an experienced mixologist and production manager with over 8 years of experience in high-volume bars in Latvia and Germany. He combines a creative approach to drinks with precise quality control and excellent guest service." }
       }
+    },
+    certificates: {
+      title: "CERTIFICATES"
     },
     partners: {
       title: "COOPERATION PARTNERS"
