@@ -23,8 +23,8 @@ export const translations = {
       notFound: "Ieraksts nav atrasts"
     },
     shop: {
-      title: "MERČENDAIZINGS",
-      subtitle: "Stils, kas runā bez vārdiem. Iegādājies mūsu ekskluzīvo atribūtiku un dāvanu kartes.",
+      title: "VEIKALS",
+      subtitle: "Mūsu produkti, dāvanu kartes un pakalpojumi vienuviet.",
       add: "PIEVIENOT GROZAM",
       empty: "Pašlaik nav pieejamu produktu",
       all: "VISI",
@@ -311,8 +311,8 @@ export const translations = {
       notFound: "Запись не найдена"
     },
     shop: {
-      title: "МЕРЧАНДАЙЗИНГ",
-      subtitle: "Стиль, который говорит без слов. Приобретайте нашу эксклюзивную атрибутику и подарочные карты.",
+      title: "МАГАЗИН",
+      subtitle: "Наши продукты, подарочные карты и услуги в одном месте.",
       add: "ДОБАВИТЬ В КОРЗИНУ",
       empty: "В настоящее время нет доступных продуктов",
       all: "ВСЕ",
@@ -599,8 +599,8 @@ export const translations = {
       notFound: "Post not found"
     },
     shop: {
-      title: "MERCHANDISE",
-      subtitle: "Style that speaks without words. Purchase our exclusive attributes and gift cards.",
+      title: "SHOP",
+      subtitle: "Our products, gift cards and services in one place.",
       add: "ADD TO CART",
       empty: "No products currently available",
       all: "ALL",

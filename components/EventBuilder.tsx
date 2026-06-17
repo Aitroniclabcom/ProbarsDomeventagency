@@ -46,7 +46,7 @@ export function EventBuilder() {
   const selectedServices = services.filter((s) => selectedIds.has(s.id));
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.email) {
+    if (!formData.name || !formData.email || !formData.phone) {
       toast({ title: t("builder.modal.error"), description: t("builder.modal.fillRequired"), variant: "destructive" });
       return;
     }
@@ -156,8 +156,8 @@ export function EventBuilder() {
               <Input id="email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="bg-[#222] border-white/10 text-white mt-1" />
             </div>
             <div>
-              <Label htmlFor="phone" className="text-white">{t("builder.modal.phone")}</Label>
-              <Input id="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="bg-[#222] border-white/10 text-white mt-1" />
+              <Label htmlFor="phone" className="text-white">{t("builder.modal.phone")} *</Label>
+              <Input id="phone" type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="bg-[#222] border-white/10 text-white mt-1" />
             </div>
             {selectedServices.length > 0 && (
               <div>
