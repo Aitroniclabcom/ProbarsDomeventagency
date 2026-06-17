@@ -40,8 +40,16 @@ export default function HomePage() {
     "Vladislavs Saveljevs": "/assets/team/vladislavs.jpg",
   };
 
-  // Display-name overrides (e.g. data still holds "Oļegs"; show "Olegs Porietis").
-  const fixName = (n: string) => (n === "Oļegs Porietis" ? "Olegs Porietis" : n);
+  // Match team members by a diacritic-stripped, lowercased name so it works
+  // regardless of locale/Unicode form (e.g. "Oļegs" in NFC vs NFD).
+  const normKey = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+  const teamImageByNorm: Record<string, string> = Object.fromEntries(
+    Object.entries(teamImageMap).map(([k, v]) => [normKey(k), v]),
+  );
+  const resolveTeamImage = (name: string, url?: string) =>
+    url || teamImageByNorm[normKey(name)] || "/assets/team/placeholder.jpg";
+  // Display-name override: show "Olegs Porietis" (data may hold "Oļegs" in any form).
+  const fixName = (n: string) => (normKey(n) === "olegs porietis" ? "Olegs Porietis" : n);
 
   const partners: { name: string; logo: string }[] = partnersBlock?.partners?.length
     ? partnersBlock.partners.map((p: any) => ({
@@ -69,7 +77,7 @@ export default function HomePage() {
     ? teamBlock.members.map((m: any) => ({
         name: m.name,
         roleKey: m.role ?? "",
-        image: m.image?.url ?? teamImageMap[m.name] ?? "/assets/team/placeholder.jpg",
+        image: resolveTeamImage(m.name, m.image?.url),
         bioKey: m.bio ?? "",
         fullBioKey: m.fullBio ?? "",
       }))
@@ -299,10 +307,12 @@ export default function HomePage() {
       <section className="py-24 bg-[#111]">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{t("partners.title") || "PARTNERI"}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-14 items-center max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 items-stretch max-w-5xl mx-auto">
             {partners.map((partner, i) => (
-              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex flex-col items-center justify-center gap-5 opacity-80 hover:opacity-100 transition-opacity">
-                <img src={partner.logo} alt={partner.name} className="max-h-44 w-auto object-contain brightness-0 invert" />
+              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex flex-col items-center gap-4">
+                <div className="w-full h-40 flex items-center justify-center bg-[#f1efe9] rounded-md p-8">
+                  <img src={partner.logo} alt={partner.name} className="max-h-24 w-auto object-contain" />
+                </div>
                 <span className="text-white text-base tracking-wide text-center font-medium">{partner.name}</span>
               </motion.div>
             ))}
