@@ -30,17 +30,26 @@ export default function ShopPage() {
   // Derive unique categories from the full product list
   const allCategories = Array.from(
     new Map(
-      products.flatMap((p) => p.categoryIds.map((id, idx) => ({ id: String(id), name: p.categoryNames[idx] || `Category ${id}` })))
+      products.flatMap((p) => p.categoryIds.map((id, idx) => ({ id: String(id), slug: p.categorySlugs?.[idx] || "", name: p.categoryNames[idx] || `Category ${id}` })))
         .map((c) => [c.id, c])
     ).values()
   );
 
-  const filtered = products.filter((p) => {
-    const name = p.name.toLowerCase();
-    const matchSearch = !search || name.includes(search.toLowerCase());
-    const matchCat = !activeCategory || p.categoryIds.includes(Number(activeCategory));
-    return matchSearch && matchCat;
-  });
+  // Translate a category by slug, falling back to the WooCommerce name.
+  const catLabel = (slug: string, fallback: string) => {
+    const key = `shop.categories.${slug}`;
+    const tr = t(key);
+    return tr === key ? fallback : tr;
+  };
+
+  const filtered = products
+    .filter((p) => {
+      const name = p.name.toLowerCase();
+      const matchSearch = !search || name.includes(search.toLowerCase());
+      const matchCat = !activeCategory || p.categoryIds.includes(Number(activeCategory));
+      return matchSearch && matchCat;
+    })
+    .sort((a, b) => a.price - b.price); // default: cheapest first (few products, no sort UI needed)
 
   function handleAddToCart(p: FrontendProduct) {
     const product: Product = {
@@ -114,7 +123,7 @@ export default function ShopPage() {
                       : "border-white/10 text-gray-500 hover:border-white/30"
                   }`}
                 >
-                  {cat.name}
+                  {catLabel(cat.slug, cat.name)}
                 </button>
               ))}
             </div>
@@ -138,7 +147,7 @@ export default function ShopPage() {
             <p className="text-lg">{t("shop.empty") || "No products found"}</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {filtered.map((product, i) => {
               const outOfStock = product.stockStatus === "outofstock";
               const isOnSale = product.isOnSale && product.salePrice !== null;

@@ -28,7 +28,7 @@ export function Footer() {
               <a href="mailto:d.o.m.eventagency@gmail.com" className="text-left text-xl hover:text-[#C0A07B] transition-colors">d.o.m.eventagency@gmail.com</a>
               <a href="tel:+37126178575" className="text-left text-xl hover:text-[#C0A07B] transition-colors">(+371) 26178575</a>
             </div>
-            <div className="mt-10 text-xs text-gray-500 font-light leading-relaxed lg:mt-12">
+            <div className="mt-10 text-sm text-gray-300 font-light leading-relaxed lg:mt-12">
               {footer?.tagline && (
                 <p className="font-medium text-gray-400 mb-2">{footer.tagline}</p>
               )}
@@ -47,7 +47,7 @@ export function Footer() {
         <div className="border-t border-white/10 mt-16 pt-8">
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-center mb-8">
             <Image src="/assets/eu-fund-logo.png" alt="ES Atveseļošanās fonds" width={120} height={48} className="h-12 w-auto object-contain" />
-            <p className="text-xs text-gray-500 font-light leading-relaxed max-w-3xl">
+            <p className="text-sm text-gray-300 font-light leading-relaxed max-w-3xl">
               SIA PROBAR reģ.nr 40203160448 Atveseļošanās fonda ietvaros veic ieguldījumu komercdarbības procesu uzlabošanā.
               Atbalstāmā darbība: jaunu digitālo risinājumu izstrāde.
               Risinājums: e-komercijas risinājums{" "}
@@ -56,7 +56,7 @@ export function Footer() {
               </a>
             </p>
           </div>
-          <div className="flex justify-between items-center text-gray-600 font-sans tracking-widest uppercase">
+          <div className="flex justify-between items-center text-gray-400 font-sans tracking-widest uppercase">
             <span className="text-xs">{t("footer.copyright")}</span>
           </div>
         </div>
