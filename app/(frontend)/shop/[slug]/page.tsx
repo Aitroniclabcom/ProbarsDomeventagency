@@ -104,6 +104,11 @@ export default function ShopProductPage() {
   const displayName = product ? pickLocalized(product.name, "name") : "";
   const displayShort = product ? pickLocalized(product.shortDescription, "short_description") : "";
   const displayDesc = product ? pickLocalized(product.description, "description") : "";
+  const catLabel = (slug: string, fallback: string) => {
+    const key = `shop.categories.${slug}`;
+    const tr = t(key);
+    return tr === key ? fallback : tr;
+  };
 
   useEffect(() => {
     setSelectedImage(0);
@@ -205,7 +210,7 @@ export default function ShopProductPage() {
             <div className="flex flex-col">
               {product.categoryNames.length > 0 && (
                 <p className="text-[10px] tracking-widest uppercase text-[#C0A07B] mb-2">
-                  {product.categoryNames[0]}
+                  {catLabel(product.categorySlugs?.[0] || "", product.categoryNames[0])}
                 </p>
               )}
               <h1 className="text-3xl md:text-4xl font-serif mb-6 text-white">{displayName}</h1>

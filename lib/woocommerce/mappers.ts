@@ -133,6 +133,7 @@ export type FrontendProduct = {
   gallery: string[];
   categoryIds: number[];
   categoryNames: string[];
+  categorySlugs: string[];
   meta: Record<string, string>;
   /** "simple" (default) or "variable". */
   type: "simple" | "variable";
@@ -255,6 +256,7 @@ export function mapWCProductToFrontend(product: WCStoreProduct): FrontendProduct
     gallery: (product.images ?? []).map((img) => img.src).filter((src): src is string => Boolean(src)),
     categoryIds: product.categories?.map((cat) => cat.id) || [],
     categoryNames: product.categories?.map((cat) => String(cat.name ?? "")) || [],
+    categorySlugs: product.categories?.map((cat) => String(cat.slug ?? "")) || [],
     meta: metaToRecord(metaData),
     type: product.type === "variable" ? "variable" : "simple",
     // priceRange + variations are filled in by the data layer (store-api) for variable products.

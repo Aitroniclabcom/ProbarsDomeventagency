@@ -33,7 +33,7 @@ export default function HomePage() {
   const teamImageMap: Record<string, string> = {
     "Deniss Smirnovs": "/assets/team/deniss.jpg",
     "Anastasija Kazarina": "/assets/team/anastasija.jpg",
-    "Oļegs Porietis": "/assets/team/olegs.jpg",
+    "Olegs Porietis": "/assets/team/olegs.jpg",
     "Andris Konopackis": "/assets/team/andris.jpg",
     "Laura Rudko": "/assets/team/laura.jpg",
     "Vladislavs Saveljevs": "/assets/team/vladislavs.jpg",
@@ -72,7 +72,7 @@ export default function HomePage() {
     : [
         { name: "Deniss Smirnovs", roleKey: "team.members.deniss.role", image: "/assets/team/deniss.jpg", bioKey: "team.members.deniss.bio", fullBioKey: "team.members.deniss.fullBio" },
         { name: "Anastasija Kazarina", roleKey: "team.members.anastasija.role", image: "/assets/team/anastasija.jpg", bioKey: "team.members.anastasija.bio", fullBioKey: "team.members.anastasija.fullBio" },
-        { name: "Oļegs Porietis", roleKey: "team.members.olegs.role", image: "/assets/team/olegs.jpg", bioKey: "team.members.olegs.bio", fullBioKey: "team.members.olegs.fullBio" },
+        { name: "Olegs Porietis", roleKey: "team.members.olegs.role", image: "/assets/team/olegs.jpg", bioKey: "team.members.olegs.bio", fullBioKey: "team.members.olegs.fullBio" },
         { name: "Andris Konopackis", roleKey: "team.members.andris.role", image: "/assets/team/andris.jpg", bioKey: "team.members.andris.bio", fullBioKey: "team.members.andris.fullBio" },
         { name: "Laura Rudko", roleKey: "team.members.laura.role", image: "/assets/team/laura.jpg", bioKey: "team.members.laura.bio", fullBioKey: "team.members.laura.fullBio" },
         { name: "Vladislavs Saveljevs", roleKey: "team.members.vladislavs.role", image: "/assets/team/vladislavs.jpg", bioKey: "team.members.vladislavs.bio", fullBioKey: "team.members.vladislavs.fullBio" },
@@ -281,9 +281,9 @@ export default function HomePage() {
       <section className="py-24 bg-[#1a1a1a]">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{t("certificates.title") || "SERTIFIKĀTI"}</h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {["/assets/certificates/certificate1.png", "/assets/certificates/certificate2.jpg", "/assets/certificates/certificate3.png"].map((cert, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-white p-4">
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-white p-6">
                 <img src={cert} alt={`Certificate ${i + 1}`} className="w-full h-auto object-contain" />
               </motion.div>
             ))}
@@ -295,11 +295,11 @@ export default function HomePage() {
       <section className="py-24 bg-[#111]">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{t("partners.title") || "PARTNERI"}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 items-stretch max-w-5xl mx-auto">
             {partners.map((partner, i) => (
-              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex flex-col items-center justify-center gap-4 bg-white p-6">
-                <img src={partner.logo} alt={partner.name} className="max-h-24 w-auto object-contain" />
-                <span className="text-[#222222] text-xs tracking-wide text-center font-medium">{partner.name}</span>
+              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex flex-col items-center justify-center gap-5 bg-[#ece9e3] p-8">
+                <img src={partner.logo} alt={partner.name} className="max-h-28 w-auto object-contain" />
+                <span className="text-[#1a1a1a] text-base tracking-wide text-center font-semibold">{partner.name}</span>
               </motion.div>
             ))}
           </div>
