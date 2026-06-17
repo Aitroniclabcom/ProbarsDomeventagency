@@ -32,6 +32,8 @@ export const translations = {
       from: "No",
       outOfStock: "Nav noliktavā",
       selectOption: "Izvēlēties opciju",
+      backToShop: "Atpakaļ uz veikalu",
+      qty: "Daudzums",
       products: {
         tshirt: { name: "D.O.M. T-Krekls", desc: "Augstas kvalitātes kokvilnas krekls ar minimālistisku logo dizainu." },
         hoodie: { name: "D.O.M. Hūdijs", desc: "Premium klases hūdijs vēsajiem vasaras vakariem." },
@@ -318,6 +320,8 @@ export const translations = {
       from: "от",
       outOfStock: "Нет в наличии",
       selectOption: "Выберите вариант",
+      backToShop: "Назад в магазин",
+      qty: "Кол-во",
       products: {
         tshirt: { name: "��утболка D.O.M.", desc: "Футболка из высококачественного хлопка с минималистичным логотипом." },
         hoodie: { name: "Худи D.O.M.", desc: "Худи премиум-класса для прохладных летних вечеров." },
@@ -604,6 +608,8 @@ export const translations = {
       from: "From",
       outOfStock: "Out of stock",
       selectOption: "Select option",
+      backToShop: "Back to shop",
+      qty: "Qty",
       products: {
         tshirt: { name: "D.O.M. T-Shirt", desc: "High-quality cotton t-shirt with minimalist logo design." },
         hoodie: { name: "D.O.M. Hoodie", desc: "Premium class hoodie for cool summer evenings." },
