@@ -154,18 +154,17 @@ export default function ShopProductPage() {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-7xl mx-auto"
           >
-            <div className="mb-10 max-w-3xl">
-              {product.categoryNames.length > 0 && (
-                <p className="text-[10px] tracking-widest uppercase text-[#C0A07B] mb-3">
-                  {catLabel(product.categorySlugs?.[0] || "", product.categoryNames[0])}
-                </p>
-              )}
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif text-white">{displayName}</h1>
-            </div>
-
             <div className="grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-start">
-              {/* Image + purchase box — sticky on desktop, follows the scroll */}
+              {/* Title + image + purchase box — sticky on desktop, follows the scroll */}
               <div className="lg:sticky lg:top-28 self-start flex flex-col gap-5">
+                <div>
+                  {product.categoryNames.length > 0 && (
+                    <p className="text-[10px] tracking-widest uppercase text-[#C0A07B] mb-2">
+                      {catLabel(product.categorySlugs?.[0] || "", product.categoryNames[0])}
+                    </p>
+                  )}
+                  <h1 className="text-3xl md:text-4xl font-serif text-white">{displayName}</h1>
+                </div>
                 <div className="relative aspect-square overflow-hidden bg-black/20 border border-white/5">
                   {mainImage ? (
                     <img src={mainImage} alt={displayName} className="w-full h-full object-contain p-3" />
