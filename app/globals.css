@@ -69,6 +69,15 @@
   }
 }
 
+/* Reliable 3-line clamp (Tailwind's line-clamp utility isn't always compiled here) */
+.clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
 /* Rich-text product descriptions (WooCommerce HTML: p / h3 / ul / ol / strong) */
 .product-description {
   color: #d4d4d4;
