@@ -116,7 +116,7 @@ export default function ShopProductPage() {
   }, [product?.id]);
 
   return (
-    <div className="bg-[#222222] min-h-screen max-w-full overflow-x-hidden text-white font-sans selection:bg-[#8C080C] selection:text-white">
+    <div className="bg-[#222222] min-h-screen max-w-full overflow-x-clip text-white font-sans selection:bg-[#8C080C] selection:text-white">
       <Navigation />
       <CartDrawer />
 
@@ -152,139 +152,141 @@ export default function ShopProductPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid md:grid-cols-[1.15fr_1fr] gap-8 lg:gap-14 max-w-7xl mx-auto"
+            className="max-w-7xl mx-auto"
           >
-            <div className="flex flex-col gap-4">
-              <div className="relative aspect-square overflow-hidden bg-black/20 border border-white/5">
-                {mainImage ? (
-                  <img
-                    src={mainImage}
-                    alt={product.name}
-                    className="w-full h-full object-contain p-3"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[#2a2a2a]">
-                    <ShoppingBag className="w-24 h-24 text-gray-700" />
-                  </div>
-                )}
-
-                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
-                  {isOnSale && (
-                    <span className="bg-white/10 text-gray-400 text-xs px-2 py-1 font-medium tracking-widest line-through">
-                      €{baseRegularPrice.toFixed(2)}
-                    </span>
-                  )}
-                  <span className="bg-[#8C080C] text-white text-xs px-2 py-1 font-medium tracking-widest">
-                    {needsVariation ? `${t("shop.from") || "No"} ` : ""}€{displayPrice.toFixed(2)}
-                  </span>
-                </div>
-
-                {outOfStock && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <span className="text-xs tracking-widest uppercase text-gray-300 border border-gray-600 px-3 py-1">
-                      {t("shop.outOfStock") || "Out of Stock"}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {gallery.length > 1 && (
-                <div className="flex gap-3 overflow-x-auto pb-1">
-                  {gallery.map((src, i) => (
-                    <button
-                      key={`${src}-${i}`}
-                      type="button"
-                      aria-label={`${product.name} – image ${i + 1}`}
-                      onClick={() => setSelectedImage(i)}
-                      className={`relative w-20 h-20 flex-shrink-0 overflow-hidden border bg-black/20 transition-colors ${
-                        selectedImage === i ? "border-[#C0A07B]" : "border-white/10 hover:border-white/30"
-                      }`}
-                    >
-                      <img src={src} alt="" className="w-full h-full object-contain p-1" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col">
+            <div className="mb-10 max-w-3xl">
               {product.categoryNames.length > 0 && (
-                <p className="text-[10px] tracking-widest uppercase text-[#C0A07B] mb-2">
+                <p className="text-[10px] tracking-widest uppercase text-[#C0A07B] mb-3">
                   {catLabel(product.categorySlugs?.[0] || "", product.categoryNames[0])}
                 </p>
               )}
-              <h1 className="text-3xl md:text-4xl font-serif mb-6 text-white">{displayName}</h1>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif text-white">{displayName}</h1>
+            </div>
+
+            <div className="grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-start">
+              {/* Image + purchase box — sticky on desktop, follows the scroll */}
+              <div className="lg:sticky lg:top-28 self-start flex flex-col gap-5">
+                <div className="relative aspect-square overflow-hidden bg-black/20 border border-white/5">
+                  {mainImage ? (
+                    <img src={mainImage} alt={displayName} className="w-full h-full object-contain p-3" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-[#2a2a2a]">
+                      <ShoppingBag className="w-24 h-24 text-gray-700" />
+                    </div>
+                  )}
+                  {outOfStock && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span className="text-xs tracking-widest uppercase text-gray-300 border border-gray-600 px-3 py-1">
+                        {t("shop.outOfStock") || "Out of Stock"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {gallery.length > 1 && (
+                  <div className="flex gap-3 overflow-x-auto pb-1">
+                    {gallery.map((src, i) => (
+                      <button
+                        key={`${src}-${i}`}
+                        type="button"
+                        aria-label={`${displayName} – ${i + 1}`}
+                        onClick={() => setSelectedImage(i)}
+                        className={`relative w-20 h-20 flex-shrink-0 overflow-hidden border bg-black/20 transition-colors ${
+                          selectedImage === i ? "border-[#C0A07B]" : "border-white/10 hover:border-white/30"
+                        }`}
+                      >
+                        <img src={src} alt="" className="w-full h-full object-contain p-1" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="border border-white/10 bg-[#1a1a1a] p-6 flex flex-col gap-5">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-2xl font-serif text-[#C0A07B]">
+                      {needsVariation ? `${t("shop.from") || "No"} ` : ""}€{displayPrice.toFixed(2)}
+                    </span>
+                    {isOnSale && (
+                      <span className="text-sm text-gray-500 line-through">€{baseRegularPrice.toFixed(2)}</span>
+                    )}
+                  </div>
+
+                  {isVariable && product.variations.length > 0 && (
+                    <div>
+                      <span className="text-xs tracking-widest uppercase text-gray-500 block mb-3">
+                        {(product.variations[0]?.attributes &&
+                          Object.keys(product.variations[0].attributes)[0]) || ""}
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {product.variations.map((v) => {
+                          const disabled = v.stockStatus === "outofstock";
+                          const active = v.id === selectedVariationId;
+                          return (
+                            <button
+                              key={v.id}
+                              type="button"
+                              disabled={disabled}
+                              aria-pressed={active}
+                              onClick={() => setSelectedVariationId(v.id)}
+                              className={`min-w-[64px] px-4 py-2 text-sm tracking-wide border transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                                active
+                                  ? "border-[#C0A07B] bg-[#C0A07B] text-[#222222]"
+                                  : "border-white/15 bg-white/5 text-white hover:border-[#C0A07B]/60"
+                              }`}
+                            >
+                              {v.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs tracking-widest uppercase text-gray-500">{t("shop.qty") || "Qty"}</span>
+                      <div className="flex items-center border border-white/10 bg-white/5">
+                        <button
+                          type="button"
+                          aria-label="Decrease quantity"
+                          disabled={quantity <= 1}
+                          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                          className="p-3 text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <Minus size={16} />
+                        </button>
+                        <span className="w-12 text-center text-sm tabular-nums">{quantity}</span>
+                        <button
+                          type="button"
+                          aria-label="Increase quantity"
+                          onClick={() => setQuantity((q) => q + 1)}
+                          className="p-3 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleAddToCart(product)}
+                      disabled={outOfStock || needsVariation}
+                      className="flex-1 min-w-[200px] bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 px-8 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ShoppingBag size={14} />{" "}
+                      {needsVariation ? t("shop.selectOption") || "Izvēlieties opciju" : t("shop.add")}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description (scrolls next to the sticky image) */}
               <div
-                className="product-description mb-8"
+                className="product-description"
                 dangerouslySetInnerHTML={{
                   __html: displayDesc || displayShort || "",
                 }}
               />
-
-              {isVariable && product.variations.length > 0 && (
-                <div className="mb-8">
-                  <span className="text-xs tracking-widest uppercase text-gray-500 block mb-3">
-                    {product.variations[0]?.attributes &&
-                      Object.keys(product.variations[0].attributes)[0]}
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {product.variations.map((v) => {
-                      const disabled = v.stockStatus === "outofstock";
-                      const active = v.id === selectedVariationId;
-                      return (
-                        <button
-                          key={v.id}
-                          type="button"
-                          disabled={disabled}
-                          aria-pressed={active}
-                          onClick={() => setSelectedVariationId(v.id)}
-                          className={`min-w-[64px] px-4 py-2 text-sm tracking-wide border transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
-                            active
-                              ? "border-[#C0A07B] bg-[#C0A07B] text-[#222222]"
-                              : "border-white/15 bg-white/5 text-white hover:border-[#C0A07B]/60"
-                          }`}
-                        >
-                          {v.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-4 mb-8">
-                <span className="text-xs tracking-widest uppercase text-gray-500">{t("shop.qty") || "Qty"}</span>
-                <div className="flex items-center border border-white/10 bg-white/5">
-                  <button
-                    type="button"
-                    aria-label="Decrease quantity"
-                    disabled={quantity <= 1}
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="p-3 text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="w-12 text-center text-sm tabular-nums">{quantity}</span>
-                  <button
-                    type="button"
-                    aria-label="Increase quantity"
-                    onClick={() => setQuantity((q) => q + 1)}
-                    className="p-3 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handleAddToCart(product)}
-                disabled={outOfStock || needsVariation}
-                className="w-full md:w-auto min-w-[240px] bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 px-8 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ShoppingBag size={14} />{" "}
-                {needsVariation ? t("shop.selectOption") || "Izvēlieties opciju" : t("shop.add")}
-              </button>
             </div>
           </motion.div>
         )}
