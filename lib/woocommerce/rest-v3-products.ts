@@ -33,6 +33,7 @@ function adaptRestV3Product(raw: Record<string, unknown>): WCStoreProduct {
     images,
     categories,
     meta_data,
+    type: typeof raw.type === "string" ? (raw.type as string) : undefined,
   };
 }
 
@@ -86,6 +87,41 @@ export async function fetchProductsViaWooRestV3(params: {
   }
 
   throw new Error(`WooCommerce REST v3 /products failed for every URL. ${errors.join(" | ")}`);
+}
+
+/**
+ * Variations of a variable product via WooCommerce REST v3.
+ * Returns raw variation objects (price/image/attributes); mapped by mapWCVariationToFrontend.
+ * Returns [] if creds are missing or every candidate URL fails (caller degrades gracefully).
+ */
+export async function fetchVariationsViaWooRestV3(
+  parentId: string | number,
+): Promise<Record<string, unknown>[]> {
+  const key = process.env.WOOCOMMERCE_CONSUMER_KEY?.trim();
+  const secret = process.env.WOOCOMMERCE_CONSUMER_SECRET?.trim();
+  if (!key || !secret) return [];
+
+  for (const root of getWooCommerceStoreRootCandidates()) {
+    const url = new URL(`${root}/wp-json/wc/v3/products/${parentId}/variations`);
+    url.searchParams.set("consumer_key", key);
+    url.searchParams.set("consumer_secret", secret);
+    url.searchParams.set("per_page", "100");
+
+    try {
+      const res = await fetch(url.toString(), {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      });
+      const body = (await res.text()).replace(/^﻿/, "").trim();
+      if (!res.ok || !body || body.startsWith("<")) continue;
+      const parsed = JSON.parse(body) as unknown;
+      if (!Array.isArray(parsed)) continue;
+      return parsed as Record<string, unknown>[];
+    } catch {
+      continue;
+    }
+  }
+  return [];
 }
 
 export async function fetchProductBySlugViaWooRestV3(slug: string): Promise<WCStoreProduct | null> {

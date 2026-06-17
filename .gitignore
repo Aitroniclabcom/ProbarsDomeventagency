@@ -16,3 +16,4 @@ vite.config.ts.*
 .env.test.local
 .env.production
 .env.production.local
+tsconfig.tsbuildinfo

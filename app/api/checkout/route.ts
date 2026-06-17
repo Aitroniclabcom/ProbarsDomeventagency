@@ -60,10 +60,13 @@ export async function POST(req: NextRequest) {
       country = "LV";
     }
 
-    const line_items = lineItems.map((item: { id: number; quantity: number }) => ({
-      product_id: Number(item.id),
-      quantity: Math.max(1, Number(item.quantity) || 1),
-    }));
+    const line_items = lineItems.map(
+      (item: { id: number; quantity: number; variationId?: number }) => ({
+        product_id: Number(item.id),
+        quantity: Math.max(1, Number(item.quantity) || 1),
+        ...(item.variationId ? { variation_id: Number(item.variationId) } : {}),
+      })
+    );
 
     let thankYouBase: string | undefined;
     if (paymentMethod === "stripe") {

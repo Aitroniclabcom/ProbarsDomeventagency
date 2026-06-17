@@ -143,6 +143,7 @@ export default function ShopPage() {
               const outOfStock = product.stockStatus === "outofstock";
               const isOnSale = product.isOnSale && product.salePrice !== null;
               const displayPrice = isOnSale ? product.salePrice! : product.price;
+              const isVariable = product.type === "variable";
 
               return (
                 <motion.div
@@ -178,7 +179,7 @@ export default function ShopPage() {
                         </span>
                       )}
                       <span className="bg-[#8C080C] text-white text-xs px-2 py-1 font-medium tracking-widest">
-                        €{displayPrice.toFixed(2)}
+                        {isVariable ? `${t("shop.from") || "No"} ` : ""}€{displayPrice.toFixed(2)}
                       </span>
                     </div>
 
@@ -210,13 +211,22 @@ export default function ShopPage() {
                       className="text-sm text-gray-500 mb-6 flex-grow font-light line-clamp-3"
                       dangerouslySetInnerHTML={{ __html: product.shortDescription || product.description }}
                     />
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      disabled={outOfStock}
-                      className="w-full bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <ShoppingBag size={14} /> {t("shop.add")}
-                    </button>
+                    {isVariable ? (
+                      <Link
+                        href={`/shop/${product.slug || product.id}`}
+                        className="w-full bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2"
+                      >
+                        <ShoppingBag size={14} /> {t("shop.selectOption") || "Izvēlēties"}
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => handleAddToCart(product)}
+                        disabled={outOfStock}
+                        className="w-full bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ShoppingBag size={14} /> {t("shop.add")}
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               );

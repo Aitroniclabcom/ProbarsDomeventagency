@@ -1,13 +1,18 @@
 import { wcAPI } from "./client";
 import {
   mapWCProductToFrontend,
+  mapWCVariationToFrontend,
   mapWCCartToFrontend,
   type FrontendProduct,
   type FrontendCart,
   type WCStoreProduct,
   type WCStoreCart,
 } from "./mappers";
-import { fetchProductsViaWooRestV3, fetchProductBySlugViaWooRestV3 } from "./rest-v3-products";
+import {
+  fetchProductsViaWooRestV3,
+  fetchProductBySlugViaWooRestV3,
+  fetchVariationsViaWooRestV3,
+} from "./rest-v3-products";
 
 function normalizeProductListResponse(response: unknown): unknown[] {
   if (Array.isArray(response)) return response;
@@ -52,14 +57,43 @@ export async function fetchProducts(params?: { per_page?: number; page?: number;
 }
 
 export async function fetchProductBySlug(slug: string): Promise<FrontendProduct | null> {
+  let mapped: FrontendProduct | null = null;
   try {
     const product = (await wcAPI.getProduct(slug)) as WCStoreProduct;
-    return mapWCProductToFrontend(product);
+    mapped = mapWCProductToFrontend(product);
   } catch (error) {
     console.warn(`[WooCommerce] Store API product ${slug} failed, trying REST v3:`, error);
     const v3 = await fetchProductBySlugViaWooRestV3(slug);
-    if (v3) return mapWCProductToFrontend(v3);
-    return null;
+    if (v3) mapped = mapWCProductToFrontend(v3);
+  }
+  if (!mapped) return null;
+  if (mapped.type === "variable") {
+    mapped = await attachVariations(mapped);
+  }
+  return mapped;
+}
+
+/** Fetch a variable product's variations and derive its price range. Degrades to the bare product on failure. */
+async function attachVariations(product: FrontendProduct): Promise<FrontendProduct> {
+  try {
+    const raw = await fetchVariationsViaWooRestV3(product.id);
+    const variations = raw.map(mapWCVariationToFrontend).filter((v) => v.id);
+    if (!variations.length) return product;
+    const prices = variations
+      .map((v) => v.salePrice ?? v.price)
+      .filter((n) => Number.isFinite(n) && n > 0);
+    const priceRange = prices.length
+      ? { min: Math.min(...prices), max: Math.max(...prices) }
+      : null;
+    return {
+      ...product,
+      variations,
+      priceRange,
+      price: priceRange ? priceRange.min : product.price,
+    };
+  } catch (e) {
+    console.error(`[WooCommerce] variations fetch failed for ${product.id}:`, e);
+    return product;
   }
 }
 

@@ -1,7 +1,7 @@
 "use client";
 import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCart } from "@/context/CartContext";
+import { useCart, getLineId } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -56,8 +56,9 @@ export function CartDrawer() {
             items.map((item) => {
               const displayPrice = item.discountPrice ?? item.price;
               const hasDiscount = item.discountPrice && item.discountPrice < item.price;
+              const lineId = getLineId(item);
               return (
-                <div key={item.id} className="flex gap-4 bg-[#222222] p-4 border border-white/5" data-testid={`cart-item-${item.id}`}>
+                <div key={lineId} className="flex gap-4 bg-[#222222] p-4 border border-white/5" data-testid={`cart-item-${lineId}`}>
                   <div className="w-20 h-20 bg-black/20 overflow-hidden flex items-center justify-center">
                     {item.image ? (
                       <img src={item.image} alt={getItemName(item)} className="w-full h-full object-cover" />
@@ -70,17 +71,20 @@ export function CartDrawer() {
                       <h3 className="text-white font-medium mb-1 flex-1">{getItemName(item)}</h3>
                       {item.isDigital && <span className="text-blue-400 text-xs flex items-center gap-1"><Download size={10} /></span>}
                     </div>
+                    {item.variationLabel && (
+                      <p className="text-gray-400 text-xs tracking-wide mb-1">{item.variationLabel}</p>
+                    )}
                     <div className="flex items-center gap-2 mb-3">
                       <p className="text-[#C0A07B]">€{displayPrice.toFixed(2)}</p>
                       {hasDiscount && <p className="text-gray-500 text-sm line-through">€{item.price.toFixed(2)}</p>}
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 border border-white/10 px-2 py-1 bg-black/20">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="text-gray-400 hover:text-white" data-testid={`button-decrease-${item.id}`}><Minus size={14} /></button>
+                        <button onClick={() => updateQuantity(lineId, item.quantity - 1)} className="text-gray-400 hover:text-white" data-testid={`button-decrease-${lineId}`}><Minus size={14} /></button>
                         <span className="text-sm w-4 text-center">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="text-gray-400 hover:text-white" data-testid={`button-increase-${item.id}`}><Plus size={14} /></button>
+                        <button onClick={() => updateQuantity(lineId, item.quantity + 1)} className="text-gray-400 hover:text-white" data-testid={`button-increase-${lineId}`}><Plus size={14} /></button>
                       </div>
-                      <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-[#8C080C] transition-colors" data-testid={`button-remove-${item.id}`}><Trash2 size={16} /></button>
+                      <button onClick={() => removeFromCart(lineId)} className="text-gray-500 hover:text-[#8C080C] transition-colors" data-testid={`button-remove-${lineId}`}><Trash2 size={16} /></button>
                     </div>
                   </div>
                 </div>
