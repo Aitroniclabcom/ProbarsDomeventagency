@@ -222,7 +222,7 @@ export default function ShopPage() {
                         {displayName}
                       </Link>
                     </h3>
-                    <p className="text-sm text-gray-500 mb-6 flex-grow font-light line-clamp-3">
+                    <p className="text-sm text-gray-500 mb-6 font-light clamp-3">
                       {(displayShort || product.description || "")
                         .replace(/<[^>]+>/g, " ")
                         .replace(/\s+/g, " ")
@@ -231,7 +231,7 @@ export default function ShopPage() {
                     {isVariable ? (
                       <Link
                         href={`/shop/${product.slug || product.id}`}
-                        className="w-full bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2"
+                        className="mt-auto w-full bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2"
                       >
                         <ShoppingBag size={14} /> {t("shop.selectOption") || "Izvēlēties"}
                       </Link>
@@ -239,7 +239,7 @@ export default function ShopPage() {
                       <button
                         onClick={() => handleAddToCart(product)}
                         disabled={outOfStock}
-                        className="w-full bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="mt-auto w-full bg-white/5 hover:bg-[#C0A07B] hover:text-[#222222] text-white border border-white/10 py-3 text-xs tracking-widest transition-all uppercase flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <ShoppingBag size={14} /> {t("shop.add")}
                       </button>
