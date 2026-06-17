@@ -153,6 +153,12 @@ export default function ShopPage() {
               const isOnSale = product.isOnSale && product.salePrice !== null;
               const displayPrice = isOnSale ? product.salePrice! : product.price;
               const isVariable = product.type === "variable";
+              const loc = (base: string, key: string) =>
+                language !== "lv" && product.meta?.[`${key}_${language}`]
+                  ? product.meta[`${key}_${language}`]
+                  : base;
+              const displayName = loc(product.name, "name");
+              const displayShort = loc(product.shortDescription, "short_description");
 
               return (
                 <motion.div
@@ -171,7 +177,7 @@ export default function ShopPage() {
                     {product.image ? (
                       <img
                         src={product.image}
-                        alt={product.name}
+                        alt={displayName}
                         className="w-full h-full object-contain p-6 transition-transform duration-700 group-hover:scale-105"
                       />
                     ) : (
@@ -213,12 +219,12 @@ export default function ShopPage() {
                         href={`/shop/${product.slug || product.id}`}
                         className="hover:text-[#C0A07B] transition-colors"
                       >
-                        {product.name}
+                        {displayName}
                       </Link>
                     </h3>
                     <p
                       className="text-sm text-gray-500 mb-6 flex-grow font-light line-clamp-3"
-                      dangerouslySetInnerHTML={{ __html: product.shortDescription || product.description }}
+                      dangerouslySetInnerHTML={{ __html: displayShort || product.description }}
                     />
                     {isVariable ? (
                       <Link

@@ -46,7 +46,7 @@ export async function fetchProducts(params?: { per_page?: number; page?: number;
   }
 
   const products = normalizeProductListResponse(response);
-  return products.flatMap((p) => {
+  let mapped = products.flatMap((p) => {
     try {
       return [mapWCProductToFrontend(p as WCStoreProduct)];
     } catch (err) {
@@ -54,6 +54,26 @@ export async function fetchProducts(params?: { per_page?: number; page?: number;
       return [];
     }
   });
+
+  // Store API list omits meta_data, so localized fields (ACF: name_en, …) are
+  // missing on the grid. Pull the REST v3 list once and merge meta by id.
+  if (mapped.length && mapped.every((p) => Object.keys(p.meta).length === 0)) {
+    try {
+      const v3 = await fetchProductsViaWooRestV3({
+        per_page: params?.per_page ?? 50,
+        page: params?.page ?? 1,
+        search: params?.search,
+      });
+      const metaById = new Map(v3.map((r) => [String(r.id), mapWCProductToFrontend(r).meta]));
+      mapped = mapped.map((p) => {
+        const m = metaById.get(p.id);
+        return m && Object.keys(m).length ? { ...p, meta: m } : p;
+      });
+    } catch (err) {
+      console.error("[WooCommerce] list meta merge failed:", err);
+    }
+  }
+  return mapped;
 }
 
 export async function fetchProductBySlug(slug: string): Promise<FrontendProduct | null> {
