@@ -34,10 +34,14 @@ export default function HomePage() {
     "Deniss Smirnovs": "/assets/team/deniss.jpg",
     "Anastasija Kazarina": "/assets/team/anastasija.jpg",
     "Olegs Porietis": "/assets/team/olegs.jpg",
+    "Oļegs Porietis": "/assets/team/olegs.jpg",
     "Andris Konopackis": "/assets/team/andris.jpg",
     "Laura Rudko": "/assets/team/laura.jpg",
     "Vladislavs Saveljevs": "/assets/team/vladislavs.jpg",
   };
+
+  // Display-name overrides (e.g. data still holds "Oļegs"; show "Olegs Porietis").
+  const fixName = (n: string) => (n === "Oļegs Porietis" ? "Olegs Porietis" : n);
 
   const partners: { name: string; logo: string }[] = partnersBlock?.partners?.length
     ? partnersBlock.partners.map((p: any) => ({
@@ -252,14 +256,14 @@ export default function HomePage() {
                 className="relative aspect-[3/4] overflow-hidden group cursor-pointer"
                 onClick={() => setActiveTeamMember(activeTeamMember === i ? null : i)}
               >
-                <img src={member.image} alt={member.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <img src={member.image} alt={fixName(member.name)} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
-                  <h3 className="text-white font-serif text-xl">{member.name}</h3>
+                  <h3 className="text-white font-serif text-xl">{fixName(member.name)}</h3>
                   <p className="text-[#C0A07B] text-xs tracking-widest mt-1">{teamBlock?.members?.length ? member.roleKey : t(member.roleKey)}</p>
                 </div>
                 <div className={`absolute inset-0 bg-black/80 flex flex-col justify-center items-center p-8 text-center transition-all duration-500 ${activeTeamMember === i ? "opacity-100 visible" : "opacity-0 invisible group-hover:opacity-100 group-hover:visible"}`}>
-                  <h3 className="text-white font-serif text-xl mb-2">{member.name}</h3>
+                  <h3 className="text-white font-serif text-xl mb-2">{fixName(member.name)}</h3>
                   <p className="text-[#C0A07B] text-xs tracking-widest mb-4">{teamBlock?.members?.length ? member.roleKey : t(member.roleKey)}</p>
                   <p className="text-gray-300 text-sm font-light leading-relaxed">
                     {teamBlock?.members?.length
@@ -295,11 +299,11 @@ export default function HomePage() {
       <section className="py-24 bg-[#111]">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{t("partners.title") || "PARTNERI"}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 items-stretch max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-14 items-center max-w-5xl mx-auto">
             {partners.map((partner, i) => (
-              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex flex-col items-center justify-center gap-5 bg-[#ece9e3] p-8">
-                <img src={partner.logo} alt={partner.name} className="max-h-28 w-auto object-contain" />
-                <span className="text-[#1a1a1a] text-base tracking-wide text-center font-semibold">{partner.name}</span>
+              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex flex-col items-center justify-center gap-5 opacity-80 hover:opacity-100 transition-opacity">
+                <img src={partner.logo} alt={partner.name} className="max-h-44 w-auto object-contain brightness-0 invert" />
+                <span className="text-white text-base tracking-wide text-center font-medium">{partner.name}</span>
               </motion.div>
             ))}
           </div>

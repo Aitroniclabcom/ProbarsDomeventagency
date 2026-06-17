@@ -222,10 +222,12 @@ export default function ShopPage() {
                         {displayName}
                       </Link>
                     </h3>
-                    <p
-                      className="text-sm text-gray-500 mb-6 flex-grow font-light line-clamp-3"
-                      dangerouslySetInnerHTML={{ __html: displayShort || product.description }}
-                    />
+                    <p className="text-sm text-gray-500 mb-6 flex-grow font-light line-clamp-3">
+                      {(displayShort || product.description || "")
+                        .replace(/<[^>]+>/g, " ")
+                        .replace(/\s+/g, " ")
+                        .trim()}
+                    </p>
                     {isVariable ? (
                       <Link
                         href={`/shop/${product.slug || product.id}`}

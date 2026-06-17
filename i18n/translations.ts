@@ -293,6 +293,7 @@ export const translations = {
         address: "Rīga, Dzirnavu 70-6a, LV-1050, Latvia",
         bank: "AS “SWEDBANK”, HABALV22 LV36HABA0551045355405"
       },
+      contactLabel: "Kontakti",
       copyright: "© 2026 D.O.M. Event Agency",
       designed: ""
     }
@@ -586,6 +587,7 @@ export const translations = {
         address: "Рига, Дзирнаву 70-6a, LV-1050, Латвия",
         bank: "AS “SWEDBANK”, HABALV22 LV36HABA0551045355405"
       },
+      contactLabel: "Контакты",
       copyright: "© 2026 D.O.M. Event Agency",
       designed: ""
     }
@@ -879,6 +881,7 @@ export const translations = {
         address: "Riga, Dzirnavu 70-6a, LV-1050, Latvia",
         bank: "AS “SWEDBANK”, HABALV22 LV36HABA0551045355405"
       },
+      contactLabel: "Contact",
       copyright: "© 2026 D.O.M. Event Agency",
       designed: ""
     }

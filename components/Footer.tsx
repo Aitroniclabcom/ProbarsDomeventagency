@@ -1,5 +1,5 @@
 "use client";
-import { Instagram, Facebook } from "lucide-react";
+import { Instagram, Facebook, Mail, Phone } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { usePayloadSettings } from "@/components/PayloadDataProvider";
 import Image from "next/image";
@@ -8,6 +8,7 @@ export function Footer() {
   const { t } = useLanguage();
   const payloadSettings = usePayloadSettings();
   const footer = payloadSettings?.footer;
+  const footerContactLabel = t("footer.contactLabel") === "footer.contactLabel" ? "Kontakti" : t("footer.contactLabel");
 
   return (
     <footer id="contacts" className="bg-black py-20 text-white border-t border-[#333]">
@@ -24,9 +25,14 @@ export function Footer() {
                 <Facebook size={20} />
               </a>
             </div>
-            <div className="mt-4 flex flex-col gap-4 font-light lg:hidden">
-              <a href="mailto:d.o.m.eventagency@gmail.com" className="text-left text-xl hover:text-[#C0A07B] transition-colors">d.o.m.eventagency@gmail.com</a>
-              <a href="tel:+37126178575" className="text-left text-xl hover:text-[#C0A07B] transition-colors">(+371) 26178575</a>
+            <div className="mt-8 flex flex-col gap-4 lg:hidden">
+              <p className="text-[10px] tracking-[0.3em] uppercase text-[#C0A07B]">{footerContactLabel}</p>
+              <a href="mailto:d.o.m.eventagency@gmail.com" className="flex items-center gap-3 text-lg font-light hover:text-[#C0A07B] transition-colors">
+                <Mail size={18} className="text-[#C0A07B] shrink-0" /> d.o.m.eventagency@gmail.com
+              </a>
+              <a href="tel:+37126178575" className="flex items-center gap-3 text-lg font-light hover:text-[#C0A07B] transition-colors">
+                <Phone size={18} className="text-[#C0A07B] shrink-0" /> (+371) 26178575
+              </a>
             </div>
             <div className="mt-10 text-sm text-gray-300 font-light leading-relaxed lg:mt-12">
               {footer?.tagline && (
@@ -39,9 +45,14 @@ export function Footer() {
               <p>{t("footer.details.bank")}</p>
             </div>
           </div>
-          <div className="hidden lg:flex flex-col gap-4 font-light text-right items-end self-start text-xl">
-            <a href="mailto:d.o.m.eventagency@gmail.com" className="hover:text-[#C0A07B] transition-colors">d.o.m.eventagency@gmail.com</a>
-            <a href="tel:+37126178575" className="hover:text-[#C0A07B] transition-colors">(+371) 26178575</a>
+          <div className="hidden lg:flex flex-col gap-5 self-start items-end text-right">
+            <p className="text-[10px] tracking-[0.3em] uppercase text-[#C0A07B]">{footerContactLabel}</p>
+            <a href="mailto:d.o.m.eventagency@gmail.com" className="flex items-center gap-3 text-lg font-light hover:text-[#C0A07B] transition-colors">
+              <Mail size={18} className="text-[#C0A07B] shrink-0" /> d.o.m.eventagency@gmail.com
+            </a>
+            <a href="tel:+37126178575" className="flex items-center gap-3 text-lg font-light hover:text-[#C0A07B] transition-colors">
+              <Phone size={18} className="text-[#C0A07B] shrink-0" /> (+371) 26178575
+            </a>
           </div>
         </div>
         <div className="border-t border-white/10 mt-16 pt-8">
