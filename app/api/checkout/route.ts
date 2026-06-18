@@ -34,7 +34,12 @@ export async function POST(req: NextRequest) {
     }
 
     const { billing, shipping, lineItems, paymentMethod, deliveryFee } = await req.json();
-    const shippingTotal = Math.max(0, Number(deliveryFee) || 0);
+    // The delivery fee is tax-inclusive (e.g. €6 incl. 21% PVN), matching how product
+    // prices are stored. WooCommerce taxes shipping_lines.total on top, so send the NET
+    // amount and let WC gross it back up to the displayed fee (€6 = €4.96 net + €1.04 PVN).
+    const PVN_RATE = 0.21;
+    const shippingGross = Math.max(0, Number(deliveryFee) || 0);
+    const shippingNet = shippingGross > 0 ? (shippingGross / (1 + PVN_RATE)).toFixed(2) : "0.00";
 
     if (!billing || !billing.email || !lineItems?.length) {
       return NextResponse.json({ error: "Missing billing info or items" }, { status: 400 });
@@ -103,13 +108,13 @@ export async function POST(req: NextRequest) {
         country: shipCountry,
       },
       line_items,
-      ...(shippingTotal > 0
+      ...(shippingGross > 0
         ? {
             shipping_lines: [
               {
                 method_id: "flat_rate",
                 method_title: "Kurjers",
-                total: shippingTotal.toFixed(2),
+                total: shippingNet,
               },
             ],
           }
