@@ -17,6 +17,7 @@ import {
   CreditCard,
   ChevronDown,
   ChevronUp,
+  Truck,
 } from "lucide-react";
 import { PaymentBrandIcons } from "@/components/checkout/PaymentBrandIcons";
 
@@ -28,6 +29,12 @@ type FormData = {
   address_1: string;
   city: string;
   country: string;
+  ship_first_name: string;
+  ship_last_name: string;
+  ship_address_1: string;
+  ship_city: string;
+  ship_postcode: string;
+  ship_country: string;
 };
 
 type PaymentMethodChoice = "bacs" | "stripe";
@@ -40,6 +47,12 @@ const EMPTY_FORM: FormData = {
   address_1: "",
   city: "",
   country: "LV",
+  ship_first_name: "",
+  ship_last_name: "",
+  ship_address_1: "",
+  ship_city: "",
+  ship_postcode: "",
+  ship_country: "LV",
 };
 
 export default function CheckoutPage() {
@@ -52,6 +65,7 @@ export default function CheckoutPage() {
   const grandTotal = total + deliveryFee;
   const router = useRouter();
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
+  const [sameAddress, setSameAddress] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodChoice>("stripe");
@@ -109,6 +123,23 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           billing: form,
+          shipping:
+            needsDelivery && !sameAddress
+              ? {
+                  first_name: form.ship_first_name,
+                  last_name: form.ship_last_name,
+                  address_1: form.ship_address_1,
+                  city: form.ship_city,
+                  postcode: form.ship_postcode,
+                  country: form.ship_country,
+                }
+              : {
+                  first_name: form.first_name,
+                  last_name: form.last_name,
+                  address_1: form.address_1,
+                  city: form.city,
+                  country: form.country,
+                },
           paymentMethod,
           deliveryFee,
           lineItems: items.map((item) => ({
@@ -299,6 +330,77 @@ export default function CheckoutPage() {
                 </select>
               </div>
             </div>
+
+            {needsDelivery ? (
+              <div className="flex flex-col gap-3 pt-2">
+                <label className="text-xs tracking-widest uppercase text-gray-400">
+                  {t("checkout.deliveryMethod") || "Delivery method"}
+                </label>
+                <div className="border border-[#C0A07B]/80 bg-white/[0.03] px-4 py-3 flex items-center gap-3">
+                  <Truck className="h-5 w-5 shrink-0 text-[#C0A07B]" aria-hidden />
+                  <span className="flex-1 text-sm text-white">
+                    {t("checkout.courier") || "Courier"}
+                    <span className="block text-xs text-gray-500">
+                      {t("checkout.courierDays") || "1–3 business days"}
+                    </span>
+                  </span>
+                  <span className="text-sm text-[#C0A07B]">€{deliveryFee.toFixed(2)}</span>
+                </div>
+
+                <label className="flex items-center gap-3 mt-1 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={sameAddress}
+                    onChange={(e) => setSameAddress(e.target.checked)}
+                    className="accent-[#C0A07B] w-4 h-4"
+                  />
+                  <span className="text-sm text-gray-300">
+                    {t("checkout.sameAddress") || "Delivery address same as billing"}
+                  </span>
+                </label>
+
+                {!sameAddress && (
+                  <div className="flex flex-col gap-4 border border-white/10 p-4 mt-1">
+                    <p className="text-xs tracking-widest uppercase text-gray-400">
+                      {t("checkout.deliveryAddress") || "Delivery address"}
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      {field("ship_first_name", t("checkout.firstName") || "First name")}
+                      {field("ship_last_name", t("checkout.lastName") || "Last name")}
+                    </div>
+                    {field("ship_address_1", t("checkout.address") || "Address")}
+                    <div className="grid grid-cols-2 gap-4">
+                      {field("ship_city", t("checkout.city") || "City")}
+                      {field("ship_postcode", t("checkout.postcode") || "Postal code", "text", false)}
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs tracking-widest uppercase text-gray-400">
+                        {t("checkout.country") || "Country"} <span className="text-[#8C080C]">*</span>
+                      </label>
+                      <select
+                        required
+                        value={form.ship_country}
+                        onChange={(e) => setForm((prev) => ({ ...prev, ship_country: e.target.value }))}
+                        className="bg-white/5 border border-white/10 text-white px-4 py-3 text-sm focus:outline-none focus:border-[#C0A07B] transition-colors"
+                      >
+                        <option value="LV">Latvia</option>
+                        <option value="LT">Lithuania</option>
+                        <option value="EE">Estonia</option>
+                        <option value="DE">Germany</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="US">United States</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="border border-white/10 px-4 py-3 text-xs text-gray-400 flex items-center gap-3 mt-2">
+                <Truck className="h-5 w-5 shrink-0 text-[#C0A07B]" aria-hidden />
+                {t("checkout.digitalDelivery") || "Digital delivery by email — no shipping."}
+              </div>
+            )}
 
             <div className="flex flex-col gap-2 pt-2">
               <label className="text-xs tracking-widest uppercase text-gray-400">

@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { billing, lineItems, paymentMethod, deliveryFee } = await req.json();
+    const { billing, shipping, lineItems, paymentMethod, deliveryFee } = await req.json();
     const shippingTotal = Math.max(0, Number(deliveryFee) || 0);
 
     if (!billing || !billing.email || !lineItems?.length) {
@@ -56,10 +56,13 @@ export async function POST(req: NextRequest) {
       wooPaymentMethod = gatewayId;
     }
 
-    let country = (billing.country || "LV").toString();
-    if (country === "other" || country.length !== 2) {
-      country = "LV";
-    }
+    const normCountry = (c: unknown) => {
+      const s = (c || "LV").toString();
+      return s === "other" || s.length !== 2 ? "LV" : s;
+    };
+    const country = normCountry(billing.country);
+    const ship = shipping || {};
+    const shipCountry = normCountry(ship.country ?? billing.country);
 
     const line_items = lineItems.map(
       (item: { id: number; quantity: number; variationId?: number }) => ({
@@ -92,11 +95,12 @@ export async function POST(req: NextRequest) {
         country,
       },
       shipping: {
-        first_name: billing.first_name || "",
-        last_name: billing.last_name || "",
-        address_1: billing.address_1 || "",
-        city: billing.city || "",
-        country,
+        first_name: ship.first_name || billing.first_name || "",
+        last_name: ship.last_name || billing.last_name || "",
+        address_1: ship.address_1 || billing.address_1 || "",
+        city: ship.city || billing.city || "",
+        postcode: ship.postcode || "",
+        country: shipCountry,
       },
       line_items,
       ...(shippingTotal > 0
