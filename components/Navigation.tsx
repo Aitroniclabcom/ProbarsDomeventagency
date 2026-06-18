@@ -63,17 +63,12 @@ export function Navigation() {
 
   const mobileMenu =
     mounted &&
+    isOpen &&
     createPortal(
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            key="mobile-nav-overlay"
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-[#111] text-2xl font-serif lg:hidden"
-            style={{ width: "100%", maxWidth: "100dvw", left: 0, right: 0 }}
-          >
+      <div
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-[#111] text-2xl font-serif lg:hidden"
+        style={{ width: "100%", maxWidth: "100dvw", left: 0, right: 0 }}
+      >
             <button type="button" className="absolute top-6 right-6 text-white" onClick={() => setIsOpen(false)} aria-label="Close menu">
               <X size={32} />
             </button>
@@ -125,9 +120,7 @@ export function Navigation() {
                 </a>
               </>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>,
+      </div>,
       document.body,
     );
 
