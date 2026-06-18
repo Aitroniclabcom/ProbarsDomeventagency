@@ -2,6 +2,7 @@
 import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart, getLineId } from "@/context/CartContext";
+import { DELIVERY_FEE } from "@/lib/shop-config";
 import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -12,7 +13,6 @@ export function CartDrawer() {
   const router = useRouter();
 
   // Mirror checkout: flat courier fee for physical carts, digital-only ships free.
-  const DELIVERY_FEE = 6;
   const needsDelivery = items.some((i) => !i.isDigital);
   const deliveryFee = needsDelivery ? DELIVERY_FEE : 0;
   const grandTotal = total + deliveryFee;

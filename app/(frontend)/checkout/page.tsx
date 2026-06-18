@@ -20,6 +20,7 @@ import {
   Truck,
 } from "lucide-react";
 import { PaymentBrandIcons } from "@/components/checkout/PaymentBrandIcons";
+import { DELIVERY_FEE } from "@/lib/shop-config";
 
 type FormData = {
   first_name: string;
@@ -59,7 +60,6 @@ export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
   const { t, language } = useLanguage();
   // Flat courier fee; digital-only carts (gift cards, courses) ship free.
-  const DELIVERY_FEE = 6;
   const needsDelivery = items.some((i) => !i.isDigital);
   const deliveryFee = needsDelivery ? DELIVERY_FEE : 0;
   const grandTotal = total + deliveryFee;
