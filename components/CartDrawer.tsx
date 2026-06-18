@@ -11,6 +11,12 @@ export function CartDrawer() {
   const { language, t } = useLanguage();
   const router = useRouter();
 
+  // Mirror checkout: flat courier fee for physical carts, digital-only ships free.
+  const DELIVERY_FEE = 6;
+  const needsDelivery = items.some((i) => !i.isDigital);
+  const deliveryFee = needsDelivery ? DELIVERY_FEE : 0;
+  const grandTotal = total + deliveryFee;
+
   const getItemName = (item: typeof items[0]) => {
     if (language === "lv" && item.nameLv) return item.nameLv;
     if (language === "ru" && item.nameRu) return item.nameRu;
@@ -94,10 +100,23 @@ export function CartDrawer() {
         </div>
 
         {items.length > 0 && (
-          <div className="p-6 bg-[#222222] border-t border-white/10 space-y-4">
-            <div className="flex justify-between items-center text-lg font-medium">
+          <div className="p-6 bg-[#222222] border-t border-white/10 space-y-3">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-400">{t("checkout.subtotal") || "Subtotal"}</span>
+              <span className="text-gray-300">€{total.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-400">
+                {t("checkout.delivery") || "Delivery"}
+                {needsDelivery ? ` · ${t("checkout.courier") || "Courier"}` : ""}
+              </span>
+              <span className="text-gray-300">
+                {needsDelivery ? `€${deliveryFee.toFixed(2)}` : t("checkout.deliveryFree") || "—"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-lg font-medium pt-1">
               <span className="text-gray-400">{t("shop.cart.total")}</span>
-              <span className="text-[#C0A07B]">€{total.toFixed(2)}</span>
+              <span className="text-[#C0A07B]">€{grandTotal.toFixed(2)}</span>
             </div>
             <Button
               onClick={() => { setIsCartOpen(false); router.push("/checkout"); }}
