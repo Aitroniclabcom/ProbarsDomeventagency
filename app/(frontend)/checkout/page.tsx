@@ -185,7 +185,7 @@ export default function CheckoutPage() {
     required = true
   ) {
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 min-w-0">
         <label className="text-xs tracking-widest uppercase text-gray-400">
           {label} {required && <span className="text-[#8C080C]">*</span>}
         </label>
@@ -194,7 +194,7 @@ export default function CheckoutPage() {
           required={required}
           value={form[key]}
           onChange={(e) => setForm((prev) => ({ ...prev, [key]: e.target.value }))}
-          className="bg-white/5 border border-white/10 text-white px-4 py-3 text-sm focus:outline-none focus:border-[#C0A07B] transition-colors placeholder-gray-700"
+          className="w-full bg-white/5 border border-white/10 text-white px-4 py-3 text-sm focus:outline-none focus:border-[#C0A07B] transition-colors placeholder-gray-700"
         />
       </div>
     );
@@ -309,7 +309,7 @@ export default function CheckoutPage() {
             {field("address_1", t("checkout.address") || "Address")}
             <div className="grid grid-cols-2 gap-4">
               {field("city", t("checkout.city") || "City")}
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 min-w-0">
                 <label className="text-xs tracking-widest uppercase text-gray-400">
                   {t("checkout.country") || "Country"}{" "}
                   <span className="text-[#8C080C]">*</span>
@@ -318,7 +318,7 @@ export default function CheckoutPage() {
                   required
                   value={form.country}
                   onChange={(e) => setForm((prev) => ({ ...prev, country: e.target.value }))}
-                  className="bg-white/5 border border-white/10 text-white px-4 py-3 text-sm focus:outline-none focus:border-[#C0A07B] transition-colors"
+                  className="bg-white/5 border border-white/10 text-white px-4 py-3 text-sm w-full focus:outline-none focus:border-[#C0A07B] transition-colors"
                 >
                   <option value="LV">Latvia</option>
                   <option value="LT">Lithuania</option>
@@ -373,7 +373,7 @@ export default function CheckoutPage() {
                       {field("ship_city", t("checkout.city") || "City")}
                       {field("ship_postcode", t("checkout.postcode") || "Postal code", "text", false)}
                     </div>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1 min-w-0">
                       <label className="text-xs tracking-widest uppercase text-gray-400">
                         {t("checkout.country") || "Country"} <span className="text-[#8C080C]">*</span>
                       </label>
@@ -381,7 +381,7 @@ export default function CheckoutPage() {
                         required
                         value={form.ship_country}
                         onChange={(e) => setForm((prev) => ({ ...prev, ship_country: e.target.value }))}
-                        className="bg-white/5 border border-white/10 text-white px-4 py-3 text-sm focus:outline-none focus:border-[#C0A07B] transition-colors"
+                        className="bg-white/5 border border-white/10 text-white px-4 py-3 text-sm w-full focus:outline-none focus:border-[#C0A07B] transition-colors"
                       >
                         <option value="LV">Latvia</option>
                         <option value="LT">Lithuania</option>
