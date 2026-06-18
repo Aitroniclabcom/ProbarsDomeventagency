@@ -45,6 +45,11 @@ const EMPTY_FORM: FormData = {
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
   const { t, language } = useLanguage();
+  // Flat courier fee; digital-only carts (gift cards, courses) ship free.
+  const DELIVERY_FEE = 6;
+  const needsDelivery = items.some((i) => !i.isDigital);
+  const deliveryFee = needsDelivery ? DELIVERY_FEE : 0;
+  const grandTotal = total + deliveryFee;
   const router = useRouter();
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
@@ -105,6 +110,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           billing: form,
           paymentMethod,
+          deliveryFee,
           lineItems: items.map((item) => ({
             id: Number(item.id),
             quantity: item.quantity,
@@ -421,9 +427,22 @@ export default function CheckoutPage() {
                   </div>
                 );
               })}
+              <div className="px-4 py-3 flex justify-between items-center text-sm">
+                <span className="text-gray-400">{t("checkout.subtotal") || "Subtotal"}</span>
+                <span className="text-gray-300">€{total.toFixed(2)}</span>
+              </div>
+              <div className="px-4 py-3 flex justify-between items-center text-sm">
+                <span className="text-gray-400">
+                  {t("checkout.delivery") || "Delivery"}
+                  {needsDelivery ? ` · ${t("checkout.courier") || "Courier"}` : ""}
+                </span>
+                <span className="text-gray-300">
+                  {needsDelivery ? `€${deliveryFee.toFixed(2)}` : t("checkout.deliveryFree") || "—"}
+                </span>
+              </div>
               <div className="px-4 py-5 flex justify-between items-center">
                 <span className="text-gray-400 tracking-wider text-sm">{t("shop.cart.total")}</span>
-                <span className="text-xl font-serif text-[#C0A07B]">€{total.toFixed(2)}</span>
+                <span className="text-xl font-serif text-[#C0A07B]">€{grandTotal.toFixed(2)}</span>
               </div>
             </div>
 

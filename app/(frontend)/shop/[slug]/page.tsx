@@ -58,7 +58,7 @@ export default function ShopProductPage() {
       price: v ? v.price : p.price,
       discountPrice: v ? v.salePrice : p.salePrice,
       image: v?.image ?? p.image,
-      isDigital: false,
+      isDigital: (p.categorySlugs || []).some((s) => s === "davanu-kartes" || s === "apmacibas"),
       variationId: v ? v.id : null,
       variationLabel: v ? v.label : null,
     };

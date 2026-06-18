@@ -65,7 +65,7 @@ export default function ShopPage() {
       price: p.price,
       discountPrice: p.salePrice,
       image: p.image,
-      isDigital: false,
+      isDigital: (p.categorySlugs || []).some((s) => s === "davanu-kartes" || s === "apmacibas"),
     };
     addToCart(product);
   }

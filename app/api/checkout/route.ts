@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { billing, lineItems, paymentMethod } = await req.json();
+    const { billing, lineItems, paymentMethod, deliveryFee } = await req.json();
+    const shippingTotal = Math.max(0, Number(deliveryFee) || 0);
 
     if (!billing || !billing.email || !lineItems?.length) {
       return NextResponse.json({ error: "Missing billing info or items" }, { status: 400 });
@@ -98,6 +99,17 @@ export async function POST(req: NextRequest) {
         country,
       },
       line_items,
+      ...(shippingTotal > 0
+        ? {
+            shipping_lines: [
+              {
+                method_id: "flat_rate",
+                method_title: "Kurjers",
+                total: shippingTotal.toFixed(2),
+              },
+            ],
+          }
+        : {}),
       ...(thankYouBase
         ? { meta_data: [{ key: HEADLESS_RETURN_META, value: thankYouBase }] }
         : {}),
