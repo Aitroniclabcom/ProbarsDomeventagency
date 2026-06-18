@@ -3,6 +3,7 @@ import { getWooCommerceBaseUrl } from "@/lib/woocommerce/config";
 import { wooRestOrdersCreateUrl } from "@/lib/woocommerce/order-rest";
 import { resolveWooStripeGatewayId } from "@/lib/woocommerce/payment-gateways";
 import { checkoutThankYouUrl } from "@/lib/site-url";
+import { DELIVERY_FEE, PVN_RATE } from "@/lib/shop-config";
 
 const HEADLESS_RETURN_META = "_headless_return_url";
 
@@ -37,8 +38,8 @@ export async function POST(req: NextRequest) {
     // The delivery fee is tax-inclusive (e.g. €6 incl. 21% PVN), matching how product
     // prices are stored. WooCommerce taxes shipping_lines.total on top, so send the NET
     // amount and let WC gross it back up to the displayed fee (€6 = €4.96 net + €1.04 PVN).
-    const PVN_RATE = 0.21;
-    const shippingGross = Math.max(0, Number(deliveryFee) || 0);
+    // Clamp to [0, DELIVERY_FEE] so a tampered request can't inflate the shipping charge.
+    const shippingGross = Math.min(DELIVERY_FEE, Math.max(0, Number(deliveryFee) || 0));
     const shippingNet = shippingGross > 0 ? (shippingGross / (1 + PVN_RATE)).toFixed(2) : "0.00";
 
     if (!billing || !billing.email || !lineItems?.length) {
