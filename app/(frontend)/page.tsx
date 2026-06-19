@@ -293,10 +293,10 @@ export default function HomePage() {
       <section className="py-24 bg-[#111]">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{t("partners.title") || "PARTNERI"}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-10 gap-y-14 items-center max-w-5xl mx-auto">
+          <div className={`grid grid-cols-2 ${partners.length % 4 === 0 ? "md:grid-cols-4" : "md:grid-cols-3"} gap-x-10 gap-y-12 items-center max-w-5xl mx-auto`}>
             {partners.map((partner, i) => (
-              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity">
-                <img src={partner.logo} alt={partner.name} className="max-h-32 w-auto object-contain" />
+              <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex items-center justify-center h-20 md:h-24 opacity-90 hover:opacity-100 transition-opacity">
+                <img src={partner.logo} alt={partner.name} className="max-h-full max-w-full object-contain" />
               </motion.div>
             ))}
           </div>
