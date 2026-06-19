@@ -289,20 +289,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CERTIFICATES */}
-      <section className="py-24 bg-[#1a1a1a]">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-serif mb-16 text-center">{t("certificates.title") || "SERTIFIKĀTI"}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-            {["/assets/certificates/certificate1.png", "/assets/certificates/certificate2.jpg", "/assets/certificates/certificate3.png"].map((cert, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-white p-6">
-                <img src={cert} alt={`Certificate ${i + 1}`} className="w-full h-auto object-contain" />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* PARTNERS */}
       <section className="py-24 bg-[#111]">
         <div className="container mx-auto px-6">
